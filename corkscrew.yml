@@ -1,0 +1,39 @@
+---
+- host: localhost
+  base_url: http://localhost
+  port: 3001
+  requests:
+    - name: login
+      endpoint: "/user/login"
+      verb: POST
+      env:
+        - FOO=BAR
+      headers:
+        - "Content-Type: application/json"
+      data:
+        username: "james"
+        password: "barry"
+      params:
+        query_param_name: query_param_value
+      register: login_response
+      callback: |
+        "echo {{ login_response.status }} >> res.txt"
+
+    - name: create_post
+      description: "Create a new post using token from previous login task"
+      endpoint: "/post"
+      verb: POST
+      timeout: 100
+      headers:
+        - "Content-Type: application/json"
+        - "Authorization: Bearer {{ login_response.data.token }}"
+
+    - name: update_user_email
+      description: "Update logged in user email"
+      endpoint: "/user/{{ login_reponse.data.id }}"
+      verb: POST
+      headers:
+        - "Content-Type: application/json"
+        - "Authorization: Bearer {{ login_response.data.token }}"
+      data:
+        email: mynewemail@email.com
