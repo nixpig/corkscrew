@@ -6,7 +6,8 @@ use std::{collections::HashMap, error::Error, fs::File, path::PathBuf};
 pub struct Config {
     pub config_file: PathBuf,
     pub parallel: bool,
-    pub hosts: Hosts,
+    pub request_names: Vec<String>,
+    pub hosts: Vec<Host>,
 }
 
 impl TryFrom<Cli> for Config {
@@ -18,10 +19,11 @@ impl TryFrom<Cli> for Config {
         let config_file = value.config_path.unwrap();
 
         let f = File::open(&config_file)?;
-        let hosts: Hosts = serde_yaml::from_reader(f)?;
+        let hosts: Vec<Host> = serde_yaml::from_reader(f)?;
 
         Ok(Config {
             config_file,
+            request_names: value.request_names,
             parallel,
             hosts,
         })
@@ -29,21 +31,18 @@ impl TryFrom<Cli> for Config {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Hosts(Vec<Host>);
-
-#[derive(Debug, Serialize, Deserialize)]
 pub struct Host {
-    host: String,
-    scheme: String,
-    port: i32,
-    requests: Vec<Request>,
+    pub host: String,
+    pub scheme: String,
+    pub port: i32,
+    pub requests: Vec<Request>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Request {
-    name: String,
-    path: String,
-    method: String,
-    params: HashMap<String, String>,
-    response: Vec<String>,
+    pub name: String,
+    pub path: String,
+    pub method: String,
+    pub params: HashMap<String, String>,
+    pub response: Vec<String>,
 }
