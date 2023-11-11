@@ -1,0 +1,37 @@
+- host: 1_jsonplaceholder.typicode.com
+  scheme: https
+  port: 443
+  requests:
+    - name: get_post_from_path
+      path: /posts/1
+      method: get
+      params:
+      response:
+        - json
+        - status
+
+- host: 2_jsonplaceholder.typicode.com
+  scheme: http
+  port: 8080
+  requests:
+    - name: get_comments_from_params
+      path: /comments
+      method: get
+      params:
+        postId: 1
+      response:
+        - json
+        - status
+
+    - name: create_a_post
+      path: /posts
+      method: post
+      params:
+      body:
+        title: Post title
+        body: Some body content in here.
+        userId: 1
+      headers:
+        Content-Type: application/json; charset=UTF-8
+      response:
+        - json
