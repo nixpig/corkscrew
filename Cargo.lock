@@ -149,7 +149,6 @@ checksum = "07cdf1b148b25c1e1f7a42225e30a0d99a615cd4637eae7365548dd4529b95bc"
 dependencies = [
  "anstream",
  "anstyle",
- "backtrace",
  "clap_lex",
  "strsim",
 ]

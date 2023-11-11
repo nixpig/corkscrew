@@ -1,11 +1,12 @@
 use clap::Parser;
 use std::error::Error;
 
-use corkscrew::{cli::Cli, config::Config};
+use corkscrew::{cli::Cli, config::Config, request};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let cli: Config = Cli::parse().try_into()?;
-    println!("{:?}", cli);
+    let config: Config = Cli::parse().try_into()?;
+
+    request::exec(&config);
 
     Ok(())
 }

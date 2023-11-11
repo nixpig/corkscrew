@@ -1,4 +1,4 @@
-- host: 1_jsonplaceholder.typicode.com
+- host: jsonplaceholder.typicode.com
   scheme: https
   port: 443
   requests:
@@ -10,7 +10,7 @@
         - json
         - status
 
-- host: 2_jsonplaceholder.typicode.com
+- host: jsonplaceholder.typicode.com
   scheme: http
   port: 8080
   requests:
