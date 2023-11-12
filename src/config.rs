@@ -33,16 +33,17 @@ impl TryFrom<Cli> for Config {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Host {
     pub host: String,
-    pub scheme: String,
-    pub port: i32,
+    pub scheme: Option<String>,
+    pub port: Option<i32>,
     pub requests: Vec<Request>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Request {
     pub name: String,
-    pub path: String,
-    pub method: String,
-    pub params: HashMap<String, String>,
-    pub response: Vec<String>,
+    pub path: Option<String>,
+    pub method: Option<String>,
+    pub params: Option<HashMap<String, String>>,
+    pub hash: Option<String>,
+    pub response: Option<Vec<String>>,
 }

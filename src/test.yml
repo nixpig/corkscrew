@@ -1,3 +1,4 @@
+# GET
 # host with no props (defaults to http:80)
 # host with only scheme prop
 # host with only port prop
@@ -10,39 +11,82 @@
 # request with all + specifying response data, e.g. json + status
 
 - host: jsonplaceholder.typicode.com
+  requests:
+    - name: get_root_without_props
+
+- host: jsonplaceholder.typicode.com
+  scheme: https
+  requests:
+    - name: get_root_with_only_scheme
+
+- host: jsonplaceholder.typicode.com
+  scheme: https
+  requests:
+    - name: get_root_with_scheme_and_port
+
+    - name: get_root_with_method
+      method: get
+
+    - name: get_path_with_only_path
+      path: /posts/1
+
+    - name: get_data_with_path_and_params
+      path: /comments
+      params:
+        postId: 1
+
+    - name: get_with_a_mix_of_things
+      method: get
+      path: /posts/1
+      params:
+        ignore: 1
+      response:
+        - json
+        - status
+
+- host: jsonplaceholder.typicode.com
   scheme: https
   port: 443
   requests:
     - name: get_post_from_path
       path: /posts/1
       method: get
+      hash: #foo-bar
       params:
       response:
         - json
         - status
 
 - host: jsonplaceholder.typicode.com
-  scheme: http
+  scheme: https
   port: 443
   requests:
-    - name: get_comments_from_params
-      path: /comments
+    - name: get_user_from_params
+      path: /posts
       method: get
       params:
-        postId: 1
+        userId: 1
       response:
         - json
         - status
 
-    - name: create_a_post
-      path: /posts
-      method: post
+    - name: multiple_params
+      path: /comments
       params:
-      body:
-        title: Post title
-        body: Some body content in here.
-        userId: 1
-      headers:
-        Content-Type: application/json; charset=UTF-8
-      response:
-        - json
+        postId: 1
+        ignore: foo
+        again: bar
+
+    # POST
+    # - name: create_a_post
+    #   path: /posts
+    #   method: post
+    #   params:
+    #   body:
+    #     title: Post title
+    #     body: Some body content in here.
+    #     userId: 1
+    #   headers:
+    #     Content-Type: application/json; charset=UTF-8
+    #   response:
+    #     - json

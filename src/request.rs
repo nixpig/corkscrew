@@ -32,17 +32,48 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
                 }
             })
             .for_each(|r| {
-                let method = Method {}[&r.method].clone();
                 let mut url = String::new();
 
-                url.push_str(&host.scheme);
+                let method = match &r.method {
+                    Some(v) => Method {}[v].clone(),
+                    None => Method {}["get"].clone(),
+                };
+
+                let scheme = match &host.scheme {
+                    Some(v) => v,
+                    None => "http",
+                };
+
+                url.push_str(scheme);
                 url.push_str("://");
                 url.push_str(&host.host);
-                url.push_str(&':'.to_string());
-                url.push_str(&host.port.to_string());
-                url.push_str(&r.path);
 
-                let req = reqwest::Client::new().request(method, url).send();
+                if let Some(port) = &host.port {
+                    url.push_str(&':'.to_string());
+                    url.push_str(&port.to_string());
+                }
+
+                if let Some(path) = &r.path {
+                    url.push_str(path)
+                }
+
+                if let Some(hash) = &r.hash {
+                    url.push_str(hash);
+                }
+
+                if let Some(params) = &r.params {
+                    let p: Vec<String> =
+                        params.iter().map(|(k, v)| format!("{}={}", k, v)).collect();
+
+                    let mut query = String::from("?");
+                    query.push_str(p.join("&").as_str());
+
+                    url.push_str(&query);
+                }
+
+                let req = reqwest::Client::new().request(method, &url).send();
+
+                println!("{:?}", url.to_string());
 
                 reqs.push(req);
             })
