@@ -1,13 +1,24 @@
 use crate::config::Config;
+use std::ops::Index;
 
-struct Method {
-    get: reqwest::Method,
+struct Method {}
+impl Index<&'_ str> for Method {
+    type Output = reqwest::Method;
+
+    fn index(&self, index: &str) -> &reqwest::Method {
+        match index {
+            "get" => &reqwest::Method::GET,
+            "post" => &reqwest::Method::POST,
+            "put" => &reqwest::Method::PUT,
+            "patch" => &reqwest::Method::PATCH,
+            "delete" => &reqwest::Method::DELETE,
+            _ => panic!("Invalid method"),
+        }
+    }
 }
 
 pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
-    let methods = Method {
-        get: reqwest::Method::GET,
-    };
+    // let methods = Method {};
 
     let mut reqs = vec![];
 
@@ -23,7 +34,7 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
                 }
             })
             .for_each(|r| {
-                let method = methods.get.clone();
+                let method = Method {}[&r.method].clone();
                 let mut url = String::new();
 
                 url.push_str(&host.scheme);
