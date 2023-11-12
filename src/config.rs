@@ -45,6 +45,6 @@ pub struct Request {
     pub method: Option<String>,
     pub params: Option<HashMap<String, String>>,
     pub hash: Option<String>,
-    pub content_type: Option<String>,
     pub headers: Option<HashMap<String, String>>,
+    pub content: Option<serde_json::Value>,
 }

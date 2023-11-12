@@ -78,7 +78,16 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
                         .expect("Expected to receive valid headers.");
                 }
 
-                let req = reqwest::Client::new().request(method, &url).headers(h);
+                let mut j = &serde_json::Value::Null;
+                if let Some(json) = &r.content {
+                    println!("{:?}", json);
+                    j = json
+                }
+
+                let req = reqwest::Client::new()
+                    .request(method, &url)
+                    .headers(h)
+                    .json(j);
 
                 reqs.push(req);
             })
