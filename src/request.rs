@@ -18,8 +18,6 @@ impl Index<&'_ str> for Method {
 }
 
 pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
-    // let methods = Method {};
-
     let mut reqs = vec![];
 
     config.hosts.iter().for_each(|host| {
@@ -40,7 +38,7 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
                 url.push_str(&host.scheme);
                 url.push_str("://");
                 url.push_str(&host.host);
-                url.push_str(":");
+                url.push_str(&':'.to_string());
                 url.push_str(&host.port.to_string());
                 url.push_str(&r.path);
 
