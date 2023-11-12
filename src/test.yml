@@ -1,3 +1,14 @@
+# host with no props (defaults to http:80)
+# host with only scheme prop
+# host with only port prop
+# host with scheme and port props
+
+# request with no props
+# request with path and method
+# request with only params
+# request with path and params
+# request with all + specifying response data, e.g. json + status
+
 - host: jsonplaceholder.typicode.com
   scheme: https
   port: 443

@@ -12,7 +12,7 @@ impl Index<&'_ str> for Method {
             "put" => &reqwest::Method::PUT,
             "patch" => &reqwest::Method::PATCH,
             "delete" => &reqwest::Method::DELETE,
-            _ => panic!("Invalid method"),
+            _ => &reqwest::Method::GET,
         }
     }
 }
@@ -50,10 +50,10 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
 
     for req in reqs {
         let res = req.await?;
-        println!("{:?}", res.url());
-        println!("{:?}", res.status());
-        let json: serde_json::Value = res.json().await?;
-        println!("{:?}", json);
+        // println!("{:?}", res.url());
+        println!(" - {:?}", res.status());
+        // let json: serde_json::Value = res.json().await?;
+        // println!("{:?}", json);
     }
 
     Ok(())
