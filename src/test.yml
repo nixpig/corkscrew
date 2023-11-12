@@ -12,7 +12,7 @@
 
 - host: jsonplaceholder.typicode.com
   scheme: http
-  port: 8080
+  port: 443
   requests:
     - name: get_comments_from_params
       path: /comments
