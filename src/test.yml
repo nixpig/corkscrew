@@ -15,7 +15,7 @@
     - name: get_root_without_props
 
 - host: jsonplaceholder.typicode.com
-  scheme: https
+  scheme: http
   requests:
     - name: get_root_with_only_scheme
 
@@ -45,8 +45,8 @@
         - status
 
 - host: jsonplaceholder.typicode.com
-  scheme: https
-  port: 443
+  scheme: http
+  port: 80
   requests:
     - name: get_post_from_path
       path: /posts/1
