@@ -71,20 +71,26 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
                     url.push_str(&query);
                 }
 
-                let req = reqwest::Client::new().request(method, &url).send();
+                let mut h = reqwest::header::HeaderMap::new();
+                if let Some(headers) = &r.headers {
+                    h = headers
+                        .try_into()
+                        .expect("Expected to receive valid headers.");
+                }
 
-                println!("{:?}", url.to_string());
+                let req = reqwest::Client::new().request(method, &url).headers(h);
 
                 reqs.push(req);
             })
     });
 
     for req in reqs {
-        let res = req.await?;
-        // println!("{:?}", res.url());
-        println!(" - {:?}", res.status());
-        // let json: serde_json::Value = res.json().await?;
-        // println!("{:?}", json);
+        let res = req.send().await?;
+        println!("{:?} - {:?}", res.status(), res.url().to_string());
+
+        let text = res.text().await?;
+        let json: serde_json::Value = serde_json::from_str(&text).expect("should decode");
+        println!("{:?}", json);
     }
 
     Ok(())
