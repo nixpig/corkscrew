@@ -35,3 +35,29 @@ corkscrew -f requests.yml
         body: Lorem ipsum dolar sit amet.
         userId: 1
 ```
+
+## API (proposed, but not yet implemented)
+
+```yaml
+- host: Required<string> # the host to which to make a request, e.g. jsonplaceholder.typicode.com
+  scheme: Optional<http|https> # the scheme to use, e.g. https (default: http)
+  port: Optional<number> # the port to use
+  requests:
+    - name: Required<string> # the name of the request, e.g. get_user_by_id
+      path: Required<string> # that path of the request, e.g. /api/user
+      method: Optional<get|post|put|patch|delete> # the http method to use, e.g. post (default: get)
+      type: Optional<json> # shorthand to specify "Content-Type: application/json" (default: text)
+      body: # Optional body content (parsed as JSON)
+        name: value # <property_name>: <property_value>
+        # also supports nested JSON structures
+        l1_name:
+          l2_name:
+            l3_name1: value
+            l3_name2:
+              l4_name1: value
+              l4_name2: value
+
+      headers: # Optional headers
+        # <header_name>: <header_value>
+        name: value
+```
