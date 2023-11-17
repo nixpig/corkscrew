@@ -45,6 +45,8 @@ corkscrew -f requests.yml get_comments
         userId: 1
 ```
 
+## Installation
+
 ## API (proposed, but not yet implemented)
 
 ```yaml
@@ -77,3 +79,23 @@ corkscrew -f requests.yml get_comments
         # <header_name>: <header_value>
         name: value
 ```
+
+## Motivation
+
+## Alternatives
+
+There are a bunch of other solutions for making REST API requests which are defined in config, just to name a few of the most common:
+
+| Name    | Type |
+| ------- | ---- |
+| cURL    | CLI  |
+| Postman | GUI  |
+| HTTPie  | CLI  |
+
+## Contribute
+
+This is a personal project for me to learn Rust and is not currently open for contributions.
+
+This may change in the future.
+
+Feel free to leave constructive comments, feedback or suggestions in the [issues](https://github.com/nixpig/corkscrew/issues).
