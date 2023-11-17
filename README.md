@@ -4,13 +4,22 @@ Declaratively build and execute http requests.
 
 > This is my first ever project in Rust. No doubt, doing some things poorly. Happy to receive constructive suggestions in [issues](https://github.com/nixpig/corkscrew/issues).
 
-## Example
+## Examples
+
+**Execute all requests in file:**
 
 ```shell
 corkscrew -f requests.yml
   # => get request to https://jsonplaceholder.typicode.com/posts/1
   # => get request to https://jsonplaceholder.typicode.com/comments?postId=1
   # => post request to https://jsonplaceholder.typicode.com/posts with body { title, body, userId }
+```
+
+**Execute specific requests in file:**
+
+```shell
+corkscrew -f requests.yml get_comments
+  # => get request to https://jsonplaceholder.typicode.com/comments?postId=1
 ```
 
 ```yaml
@@ -47,7 +56,13 @@ corkscrew -f requests.yml
       path: Required<string> # that path of the request, e.g. /api/user
       method: Optional<get|post|put|patch|delete> # the http method to use, e.g. post (default: get)
       type: Optional<json> # shorthand to specify "Content-Type: application/json" (default: text)
-      body: # Optional body content (parsed as JSON)
+
+      # Optional request parameters (parsed as name=value)
+      params:
+        name: value
+
+      # Optional body content (parsed as JSON)
+      body:
         name: value # <property_name>: <property_value>
         # also supports nested JSON structures
         l1_name:
@@ -57,7 +72,8 @@ corkscrew -f requests.yml
               l4_name1: value
               l4_name2: value
 
-      headers: # Optional headers
+      # Optional headers
+      headers:
         # <header_name>: <header_value>
         name: value
 ```
