@@ -24,8 +24,10 @@ corkscrew -f requests.yml get_comments
 
 ```yaml
 # requests.yml
-- host: jsonplaceholder.typicode.com
+- name: jsonplaceholder
+  host: jsonplaceholder.typicode.com
   scheme: https
+  port: 3001
   requests:
     - name: get_posts
       path: /posts/1
@@ -38,11 +40,15 @@ corkscrew -f requests.yml get_comments
     - name: create_post
       path: /posts
       method: post
-      type: json
+      auth:
+        type: bearer
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAyMDU4MjIsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6Mn0.1uKA2rzEoOajZ5bBnxes9XIUo2iOwKCD7bVVwvRzJ48
       body:
-        title: foo
-        body: Lorem ipsum dolar sit amet.
-        userId: 1
+        type: json
+        content:
+          title: foo
+          body: Lorem ipsum dolar sit amet.
+          userId: 1
 ```
 
 ## Installation

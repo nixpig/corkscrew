@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -10,9 +10,15 @@ use std::path::PathBuf;
 pub struct Cli {
     pub request_names: Vec<String>,
 
-    #[clap(short = 'f', long = "file", default_value = "corkscrew.yml")]
+    #[clap(
+        short = 'f',
+        long = "file",
+        default_value = "corkscrew.yml",
+        name = "file_path",
+        help = "Path to file containing hosts and requests"
+    )]
     pub config_path: Option<PathBuf>,
 
-    #[clap(short = 'p', long = "parallel")]
+    #[clap(short = 'p', long = "parallel", action=ArgAction::SetTrue, help="Run requests in parallel")]
     pub parallel: Option<bool>,
 }

@@ -80,7 +80,6 @@ pub async fn exec(config: &Config) -> Result<(), reqwest::Error> {
 
                 let mut j = &serde_json::Value::Null;
                 if let Some(json) = &r.content {
-                    println!("{:?}", json);
                     j = json
                 }
 
