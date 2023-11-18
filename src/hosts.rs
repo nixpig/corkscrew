@@ -77,7 +77,7 @@ mod test {
 
         println!("HOSTS IN HERE: {:?}", hosts);
 
-        let expected = vec![Host {
+        let expected = Hosts(vec![Host {
             name: String::from("test_host_name"),
             host: String::from("localhost"),
             port: None,
@@ -91,9 +91,9 @@ mod test {
                 path: None,
                 name: String::from("test_request_name"),
             }],
-        }];
+        }]);
 
-        assert_eq!(hosts.0, expected);
+        assert_eq!(hosts, expected);
 
         Ok(())
     }
