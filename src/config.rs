@@ -1,13 +1,11 @@
 use crate::cli::Cli;
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error, fs::File, path::PathBuf};
+use std::{error::Error, path::PathBuf};
 
 #[derive(Debug)]
 pub struct Config {
-    pub config_file: PathBuf,
+    pub config_path: PathBuf,
     pub parallel: bool,
     pub request_names: Vec<String>,
-    pub hosts: Vec<Host>,
 }
 
 impl TryFrom<Cli> for Config {
@@ -15,36 +13,122 @@ impl TryFrom<Cli> for Config {
 
     fn try_from(value: Cli) -> Result<Self, Box<dyn Error>> {
         let parallel = value.parallel.unwrap_or(false);
-
-        let config_file = value.config_path.unwrap();
-
-        let f = File::open(&config_file)?;
-        let hosts: Vec<Host> = serde_yaml::from_reader(f)?;
+        let config_file = value.config_path.unwrap_or(PathBuf::from("hosts.yml"));
+        let request_names = value.request_names;
 
         Ok(Config {
-            config_file,
-            request_names: value.request_names,
+            config_path: config_file,
             parallel,
-            hosts,
+            request_names,
         })
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Host {
-    pub host: String,
-    pub scheme: Option<String>,
-    pub port: Option<i32>,
-    pub requests: Vec<Request>,
-}
+#[cfg(test)]
+mod test {
+    use super::Config;
+    use crate::cli::Cli;
+    use std::{error::Error, path::PathBuf};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Request {
-    pub name: String,
-    pub path: Option<String>,
-    pub method: Option<String>,
-    pub params: Option<HashMap<String, String>>,
-    pub hash: Option<String>,
-    pub headers: Option<HashMap<String, String>>,
-    pub content: Option<serde_json::Value>,
+    #[test]
+    fn test_cli_config_defaults() -> Result<(), Box<dyn Error>> {
+        let config: Config = Cli {
+            config_path: None,
+            parallel: None,
+            request_names: vec![],
+        }
+        .try_into()?;
+
+        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert!(!config.parallel);
+        assert_eq!(config.request_names, vec![] as Vec<String>);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_cli_config_path() -> Result<(), Box<dyn Error>> {
+        let config: Config = Cli {
+            config_path: Some(PathBuf::from("test.yml")),
+            parallel: None,
+            request_names: vec![],
+        }
+        .try_into()?;
+
+        assert_eq!(config.config_path, PathBuf::from("test.yml"));
+        assert!(!config.parallel);
+        assert_eq!(config.request_names, vec![] as Vec<String>);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_cli_config_parallel() -> Result<(), Box<dyn Error>> {
+        let config: Config = Cli {
+            config_path: None,
+            parallel: Some(true),
+            request_names: vec![],
+        }
+        .try_into()?;
+
+        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert!(config.parallel);
+        assert_eq!(config.request_names, vec![] as Vec<String>);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_cli_config_request_names() -> Result<(), Box<dyn Error>> {
+        let config: Config = Cli {
+            config_path: None,
+            parallel: None,
+            request_names: vec![
+                String::from("test_one"),
+                String::from("test_two"),
+                String::from("test_three"),
+            ],
+        }
+        .try_into()?;
+
+        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert!(!config.parallel);
+        assert_eq!(
+            config.request_names,
+            vec![
+                String::from("test_one"),
+                String::from("test_two"),
+                String::from("test_three"),
+            ],
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_cli_config_combi() -> Result<(), Box<dyn Error>> {
+        let config: Config = Cli {
+            config_path: Some(PathBuf::from("test.yml")),
+            parallel: Some(true),
+            request_names: vec![
+                String::from("test_one"),
+                String::from("test_two"),
+                String::from("test_three"),
+            ],
+        }
+        .try_into()?;
+
+        assert_eq!(config.config_path, PathBuf::from("test.yml"));
+        assert!(config.parallel);
+        assert_eq!(
+            config.request_names,
+            vec![
+                String::from("test_one"),
+                String::from("test_two"),
+                String::from("test_three"),
+            ],
+        );
+
+        Ok(())
+    }
 }
