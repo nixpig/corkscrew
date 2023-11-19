@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-enum Method {
+pub enum Method {
     Get,
     Post,
     Put,
@@ -21,7 +21,7 @@ impl Method {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Timeout(u32);
+pub struct Timeout(u32);
 
 impl Timeout {
     fn default() -> Self {
@@ -30,7 +30,15 @@ impl Timeout {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct Hosts(Vec<Host>);
+pub struct Hosts {
+    pub data: Vec<Host>,
+}
+
+impl Hosts {
+    pub fn new(hosts: Vec<Host>) -> Self {
+        Hosts { data: hosts }
+    }
+}
 
 #[derive(Debug)]
 pub struct HostsParseError(Box<dyn Error>);
@@ -44,37 +52,41 @@ impl FromStr for Hosts {
     type Err = HostsParseError;
 
     fn from_str(s: &str) -> Result<Self, HostsParseError> {
-        let hosts: Self = serde_yaml::from_str(s)?;
+        let hosts = Hosts {
+            data: serde_yaml::from_str(s)?,
+        };
+
         Ok(hosts)
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Host {
-    name: String,
-    host: String,
-    port: Option<u16>,
+pub struct Host {
+    pub name: String,
+    pub host: String,
+    pub scheme: Option<String>,
+    pub port: Option<u16>,
     #[serde(default = "Timeout::default")]
-    timeout: Timeout,
-    requests: Vec<Request>,
+    pub timeout: Timeout,
+    pub requests: Vec<Request>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Request {
-    name: String,
-    resource: Option<String>,
+pub struct Request {
+    pub name: String,
+    pub resource: Option<String>,
     #[serde(default = "Method::default")]
-    method: Method,
-    hash: Option<String>,
-    params: Option<HashMap<String, String>>,
-    headers: Option<HashMap<String, String>>,
-    auth: Option<AuthType>,
-    body: Option<serde_json::Value>,
+    pub method: Method,
+    pub hash: Option<String>,
+    pub params: Option<HashMap<String, String>>,
+    pub headers: Option<HashMap<String, String>>,
+    pub auth: Option<AuthType>,
+    pub body: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-enum AuthType {
+pub enum AuthType {
     Basic { username: String, password: String },
     Bearer { token: String },
 }
@@ -97,10 +109,11 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_required_fields)?;
 
-        let expected = Hosts(vec![Host {
+        let expected = Hosts::new(vec![Host {
             name: String::from("test_required_fields"),
             host: String::from("localhost"),
             port: None,
+            scheme: None,
             timeout: Timeout(30),
             requests: vec![Request {
                 auth: None,
@@ -132,9 +145,10 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_enum_fields)?;
 
-        let expected = Hosts(vec![Host {
+        let expected = Hosts::new(vec![Host {
             name: String::from("test_enum_fields"),
             host: String::from("localhost"),
+            scheme: None,
             timeout: Timeout(10),
             port: None,
             requests: vec![Request {
@@ -160,6 +174,7 @@ mod test {
   host: localhost
   timeout: 15
   port: 3000
+  scheme: https
   requests: 
     - name: test_post
       method: !post
@@ -183,11 +198,12 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_all_unconstrained_fields)?;
 
-        let expected = Hosts(vec![Host {
+        let expected = Hosts::new(vec![Host {
             name: String::from("test_unconstrained_fields"),
             host: String::from("localhost"),
             timeout: Timeout(15),
             port: Some(3000),
+            scheme: Some(String::from("https")),
             requests: vec![Request {
                 name: String::from("test_post"),
                 method: Method::Post,
@@ -236,6 +252,7 @@ mod test {
         let hosts_str_basic_auth = "
 - name: test_basic_auth
   host: localhost
+  scheme: http
   requests:
     - name: basic_auth_request
       auth: !basic 
@@ -245,11 +262,12 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_basic_auth)?;
 
-        let expected = Hosts(vec![Host {
+        let expected = Hosts::new(vec![Host {
             name: String::from("test_basic_auth"),
             host: String::from("localhost"),
             port: None,
             timeout: Timeout(30),
+            scheme: Some(String::from("http")),
             requests: vec![Request {
                 name: String::from("basic_auth_request"),
                 auth: Some(AuthType::Basic {
@@ -283,10 +301,11 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_bearer_auth)?;
 
-        let expected = Hosts(vec![Host {
+        let expected = Hosts::new(vec![Host {
             name: String::from("test_bearer_auth"),
             host: String::from("localhost"),
             port: None,
+            scheme: None,
             timeout: Timeout(30),
             requests: vec![Request {
                 name: String::from("bearer_auth_request"),
@@ -324,12 +343,13 @@ mod test {
 
         let hosts = Hosts::from_str(hosts_str_multiple)?;
 
-        let expected = Hosts(vec![
+        let expected = Hosts::new(vec![
             Host {
                 name: String::from("test_host_1"),
                 host: String::from("foo.localhost"),
                 timeout: Timeout(30),
                 port: None,
+                scheme: None,
                 requests: vec![
                     Request {
                         name: String::from("test_host_1_post_1"),
@@ -357,6 +377,7 @@ mod test {
                 name: String::from("test_host_2"),
                 host: String::from("bar.localhost"),
                 timeout: Timeout(30),
+                scheme: None,
                 port: None,
                 requests: vec![
                     Request {
