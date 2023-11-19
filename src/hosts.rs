@@ -69,15 +69,7 @@ struct Request {
     params: Option<HashMap<String, String>>,
     headers: Option<HashMap<String, String>>,
     auth: Option<AuthType>,
-    body: Option<Body>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Body {
-    // type: Option<String>, // optional, defaults to JSON
-    // TODO: need to add constraints around this, e.g. if type is JSON
-    // TODO: need to automatically work out if content is string or json/hashmap if content is
-    // string or serde_json::Value/hashmap
+    body: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -179,6 +171,14 @@ mod test {
       params:
         param1: value1
         param2: value2
+      body:
+        prop1a: val1a
+        prop1b: 
+          prop2a: val2a
+          prop2b:
+            prop3a: val3a
+            prop3b: val3b
+        
 ";
 
         let hosts = Hosts::from_str(hosts_str_all_unconstrained_fields)?;
@@ -207,7 +207,21 @@ mod test {
                     (String::from("param1"), String::from("value1")),
                     (String::from("param2"), String::from("value2")),
                 ])),
-                body: None,
+                body: Some(
+                    serde_json::from_str(
+                        "{
+                            \"prop1a\": \"val1a\",
+                            \"prop1b\": {
+                                \"prop2a\": \"val2a\",
+                                \"prop2b\": {
+                                    \"prop3a\": \"val3a\",
+                                    \"prop3b\": \"val3b\"
+                                }
+                            }
+                        }",
+                    )
+                    .unwrap(),
+                ),
                 auth: None,
             }],
         }]);
@@ -294,9 +308,7 @@ mod test {
     }
 
     #[test]
-    fn test_parse_body_field() -> Result<(), HostsParseError> {
+    fn test_parse_multiple_hosts() -> Result<(), HostsParseError> {
         Ok(())
     }
-
-    // TODO: test multiple hosts + multiple requests
 }

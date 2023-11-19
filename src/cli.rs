@@ -13,7 +13,7 @@ pub struct Cli {
     #[clap(
         short = 'f',
         long = "file",
-        default_value = "corkscrew.yml",
+        default_value = "hosts.yml",
         name = "file_path",
         help = "Path to file containing hosts and requests"
     )]

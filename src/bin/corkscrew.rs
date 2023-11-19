@@ -12,18 +12,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // 2b. in future - read stdin to string
     let hosts_str: String = fs::read_to_string(config.config_path)?;
 
-    // Parse string to structs
+    // 3. Parse string to structs
     let hosts = Hosts::from_str(&hosts_str);
+    println!("hosts: {:?}", hosts);
 
-    // Validate and build requests from structs
-    // Execute requests
-    // format output
-    // write output to stdout
-    // 1. parser - parse input file (e.g. corkscrew.yml) to structs
-    // 2. builder - build requests from structs
-    // 3. writer - write output to stdout/file
+    // 4. Validate and build requests from structs
+    // let requests: Requests = Requests::build(hosts);
+    // println!("requests: {:?}", requests);
 
-    println!("{:?}", hosts);
+    // 5. Execute requests and print to stdout
+    // Requests::exec(requests)?;
 
     // request::exec(&config).await?;
 
