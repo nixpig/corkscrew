@@ -237,6 +237,7 @@ mod test {
             port: None,
             timeout: Timeout(30),
             requests: vec![Request {
+                name: String::from("basic_auth_request"),
                 auth: Some(AuthType::Basic {
                     username: String::from("test_username"),
                     password: String::from("test_password"),
@@ -247,7 +248,6 @@ mod test {
                 method: Method::Get,
                 params: None,
                 resource: None,
-                name: String::from("basic_auth_request"),
             }],
         }]);
 
@@ -275,6 +275,7 @@ mod test {
             port: None,
             timeout: Timeout(30),
             requests: vec![Request {
+                name: String::from("bearer_auth_request"),
                 auth: Some(AuthType::Bearer {
                     token: String::from("abcd$1234.231&4dfs-asdfjsdv.vsd"),
                 }),
@@ -284,7 +285,6 @@ mod test {
                 method: Method::Get,
                 params: None,
                 resource: None,
-                name: String::from("bearer_auth_request"),
             }],
         }]);
 
