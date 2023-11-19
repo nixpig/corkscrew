@@ -309,6 +309,81 @@ mod test {
 
     #[test]
     fn test_parse_multiple_hosts() -> Result<(), HostsParseError> {
+        let hosts_str_multiple = "
+- name: test_host_1
+  host: foo.localhost
+  requests: 
+    - name: test_host_1_post_1
+    - name: test_host_1_post_2
+- name: test_host_2
+  host: bar.localhost
+  requests: 
+    - name: test_host_2_post_1
+    - name: test_host_2_post_2
+";
+
+        let hosts = Hosts::from_str(hosts_str_multiple)?;
+
+        let expected = Hosts(vec![
+            Host {
+                name: String::from("test_host_1"),
+                host: String::from("foo.localhost"),
+                timeout: Timeout(30),
+                port: None,
+                requests: vec![
+                    Request {
+                        name: String::from("test_host_1_post_1"),
+                        method: Method::Get,
+                        auth: None,
+                        body: None,
+                        hash: None,
+                        headers: None,
+                        params: None,
+                        resource: None,
+                    },
+                    Request {
+                        name: String::from("test_host_1_post_2"),
+                        method: Method::Get,
+                        auth: None,
+                        body: None,
+                        hash: None,
+                        headers: None,
+                        params: None,
+                        resource: None,
+                    },
+                ],
+            },
+            Host {
+                name: String::from("test_host_2"),
+                host: String::from("bar.localhost"),
+                timeout: Timeout(30),
+                port: None,
+                requests: vec![
+                    Request {
+                        name: String::from("test_host_2_post_1"),
+                        method: Method::Get,
+                        auth: None,
+                        body: None,
+                        hash: None,
+                        headers: None,
+                        params: None,
+                        resource: None,
+                    },
+                    Request {
+                        name: String::from("test_host_2_post_2"),
+                        method: Method::Get,
+                        auth: None,
+                        body: None,
+                        hash: None,
+                        headers: None,
+                        params: None,
+                        resource: None,
+                    },
+                ],
+            },
+        ]);
+
+        assert_eq!(hosts, expected);
         Ok(())
     }
 }
