@@ -28,20 +28,20 @@ corkscrew -f requests.yml get_comments
   host: jsonplaceholder.typicode.com
   scheme: https
   port: 3001
+  timeout: 10
   requests:
     - name: get_posts
-      path: /posts/1
+      resource: /posts/1
 
     - name: get_comments
-      path: /comments
+      resource: /comments
       params:
         postId: 1
 
     - name: create_post
-      path: /posts
-      method: post
-      auth:
-        type: bearer
+      resource: /posts
+      method: !post
+      auth: !bearer
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAyMDU4MjIsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6Mn0.1uKA2rzEoOajZ5bBnxes9XIUo2iOwKCD7bVVwvRzJ48
       body:
         type: json
@@ -59,10 +59,11 @@ corkscrew -f requests.yml get_comments
 - host: Required<string> # the host to which to make a request, e.g. jsonplaceholder.typicode.com
   scheme: Optional<http|https> # the scheme to use, e.g. https (default: http)
   port: Optional<number> # the port to use
+  timeout: Optional<number> # number of seconds before timing out (default: 30)
   requests:
     - name: Required<string> # the name of the request, e.g. get_user_by_id
-      path: Required<string> # that path of the request, e.g. /api/user
-      method: Optional<get|post|put|patch|delete> # the http method to use, e.g. post (default: get)
+      resource: Required<string> # that resource to request, e.g. /api/user
+      method: Optional<Enum<!get|!post|!put|!patch|!delete> # the http method to use, e.g. !post (default: !get)
       type: Optional<json> # shorthand to specify "Content-Type: application/json" (default: text)
 
       # Optional request parameters (parsed as name=value)
