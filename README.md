@@ -57,6 +57,11 @@ corkscrew -f requests.yml get_comments
 
 ## Installation
 
+1. `git clone https://github.com/nixpig/corkscrew.git`
+1. `cd corkscrew`
+1. `cargo build --release`
+1. `mv target/release/corkscrew ~/.local/bin/`
+
 ## API
 
 Currently implemented. This is a work in progress and open to change.
