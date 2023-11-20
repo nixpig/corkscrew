@@ -23,7 +23,7 @@ corkscrew -f requests.yml get_comments
 ```
 
 ```yaml
-# requests.yml
+# hosts.yml
 - name: example
   host: example.com
   requests:
@@ -59,10 +59,11 @@ corkscrew -f requests.yml get_comments
 
 ## API
 
-Currently implemented. This is a work in progress and open to change)
+Currently implemented. This is a work in progress and open to change.
 
 ```yaml
-- host: Required<string> # the host to which to make a request, e.g. jsonplaceholder.typicode.com
+- name: # name of the host (can be any string, it's not used to build the actual request)
+  host: # the host to which to make a request, e.g. example.com
   scheme: Optional<http|https> # the scheme to use, e.g. https (default: http)
   port: Optional<number> # the port to use
   timeout: Optional<number> # number of seconds before timing out (default: 30)
@@ -71,20 +72,21 @@ Currently implemented. This is a work in progress and open to change)
       resource: Required<string> # that resource to request, e.g. /api/user
       method: Optional<Enum<!get|!post|!put|!patch|!delete> # the http method to use, e.g. !post (default: !get)
 
-      # Optional request parameters (parsed as name=value)
+      # Optional request parameters
       params:
+        # <parameter_name>: <parameter_value>
         name: value
 
-      # Optional body content (parsed as JSON)
+      # Optional body content (parsed to JSON)
       body:
         name: value # <property_name>: <property_value>
         # also supports nested JSON structures
-        l1_name:
-          l2_name:
-            l3_name1: value
-            l3_name2:
-              l4_name1: value
-              l4_name2: value
+        l1_name1: l1_value1
+        l1_name2:
+          l2_name1: l2_value1
+          l2_name2:
+            l3_name1: l3_value1
+            l3_name2: l3_value2
 
       # Optional headers
       headers:
@@ -107,7 +109,7 @@ I've tried most of these in the past, but they didn't quite fit into my workflow
 | cURL    | CLI  | Depending on the approach, either searching through shell history or maintaining lots of `.http` files. |
 | Postman | GUI  | GUI apps don't fit well into my workflow. JSON is a pain to maintain.                                   |
 
-Yes, I've also tried <insert favourite util>, raw-dogging `ncat` requests, and everything in between.
+Yes, I've also tried _{insert favourite util here}_, raw-dogging `ncat` requests, and everything in between.
 
 ## Contribute
 
