@@ -6,16 +6,16 @@ Declaratively build and execute http requests.
 
 ## Examples
 
-**Execute all requests in file:**
+**Execute all requests in `hosts.yml` file:**
 
 ```shell
-corkscrew -f requests.yml
+corkscrew
   # => get request to https://jsonplaceholder.typicode.com/posts/1
   # => get request to https://jsonplaceholder.typicode.com/comments?postId=1
   # => post request to https://jsonplaceholder.typicode.com/posts with body { title, body, userId }
 ```
 
-**Execute specific requests in file:**
+**Execute specific requests in `requests.yml` file:**
 
 ```shell
 corkscrew -f requests.yml get_comments
@@ -24,11 +24,8 @@ corkscrew -f requests.yml get_comments
 
 ```yaml
 # requests.yml
-- name: jsonplaceholder
-  host: jsonplaceholder.typicode.com
-  scheme: https
-  port: 3001
-  timeout: 10
+- name: example
+  host: example.com
   requests:
     - name: get_posts
       resource: /posts/1
@@ -44,16 +41,25 @@ corkscrew -f requests.yml get_comments
       auth: !bearer
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAyMDU4MjIsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6Mn0.1uKA2rzEoOajZ5bBnxes9XIUo2iOwKCD7bVVwvRzJ48
       body:
-        type: json
-        content:
-          title: foo
-          body: Lorem ipsum dolar sit amet.
-          userId: 1
+        title: Lorem ipsum
+        body: Lorem ipsum dolar sit amet.
+        userId: 1
+
+    - name: update_post_title
+      resource: /posts/1
+      method: !patch
+      auth: !basic
+        username: corks
+        password: p4ssw0rd
+      body:
+        title: Dolar sit
 ```
 
 ## Installation
 
-## API (proposed, but not yet implemented)
+## API
+
+Currently implemented. This is a work in progress and open to change)
 
 ```yaml
 - host: Required<string> # the host to which to make a request, e.g. jsonplaceholder.typicode.com
@@ -64,7 +70,6 @@ corkscrew -f requests.yml get_comments
     - name: Required<string> # the name of the request, e.g. get_user_by_id
       resource: Required<string> # that resource to request, e.g. /api/user
       method: Optional<Enum<!get|!post|!put|!patch|!delete> # the http method to use, e.g. !post (default: !get)
-      type: Optional<json> # shorthand to specify "Content-Type: application/json" (default: text)
 
       # Optional request parameters (parsed as name=value)
       params:
@@ -89,15 +94,20 @@ corkscrew -f requests.yml get_comments
 
 ## Motivation
 
+I wanted a way to define project-specific REST API requests to quickly and easily execute from the command-line.
+
 ## Alternatives
 
-There are a bunch of other solutions for making REST API requests which are defined in config, just to name a few of the most common:
+There are a bunch of other solutions for making REST API requests.
 
-| Name    | Type |
-| ------- | ---- |
-| cURL    | CLI  |
-| Postman | GUI  |
-| HTTPie  | CLI  |
+I've tried most of these in the past, but they didn't quite fit into my workflow as I needed. They may well work for you, in which case, don't worry!
+
+| Name    | Type | Challenges                                                                                              |
+| ------- | ---- | ------------------------------------------------------------------------------------------------------- |
+| cURL    | CLI  | Depending on the approach, either searching through shell history or maintaining lots of `.http` files. |
+| Postman | GUI  | GUI apps don't fit well into my workflow. JSON is a pain to maintain.                                   |
+
+Yes, I've also tried <insert favourite util>, raw-dogging `ncat` requests, and everything in between.
 
 ## Contribute
 
