@@ -1,8 +1,8 @@
 # 🌀 corkscrew
 
-Declaratively build and execute http requests.
+A simple tool for executing HTTP requests configured in YAML. Written in Rust, btw.
 
-> This is my first ever project in Rust. No doubt, doing some things poorly. Happy to receive constructive suggestions in [issues](https://github.com/nixpig/corkscrew/issues).
+> 🦀 This is my first ever project in Rust. No doubt, doing some things poorly. Happy to receive constructive suggestions in [issues](https://github.com/nixpig/corkscrew/issues).
 
 ## Examples
 
