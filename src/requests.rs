@@ -81,8 +81,23 @@ impl Requests {
 
         for (name, req) in requests {
             let res = req.send().await?;
+            let status = res.status();
 
-            println!("{} | {}", name, res.status());
+            println!("{} | {}", name, status);
+
+            match status.as_u16() {
+                200..=299 => {
+                    let body = res.text().await?;
+                    println!("{:#}\n", body);
+                }
+                400..=599 => {
+                    let error = res.text().await?;
+                    println!("Error: {}", error);
+                }
+                _ => {
+                    println!("TODO: handle other status codes ({})", status);
+                }
+            }
         }
 
         Ok(())
