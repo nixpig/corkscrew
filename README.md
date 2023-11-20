@@ -39,7 +39,7 @@ corkscrew -f requests.yml get_comments
       resource: /posts
       method: !post
       auth: !bearer
-        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAyMDU4MjIsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6Mn0.1uKA2rzEoOajZ5bBnxes9XIUo2iOwKCD7bVVwvRzJ48
+        token: abcd$1234.231&4dfs-asdfjsdv.vsd
       body:
         title: Lorem ipsum
         body: Lorem ipsum dolar sit amet.
