@@ -109,7 +109,7 @@ I've tried most of these in the past, but they didn't quite fit into my workflow
 | cURL    | CLI  | Depending on the approach, either searching through shell history or maintaining lots of `.http` files. |
 | Postman | GUI  | GUI apps don't fit well into my workflow. JSON is a pain to maintain.                                   |
 
-Yes, I've also tried _{insert favourite util here}_, raw-dogging `ncat` requests, and everything in between.
+Yes, I've also tried _insert favourite util here_, raw-dogging `ncat` requests, and everything in between.
 
 ## Contribute
 
