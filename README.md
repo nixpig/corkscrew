@@ -77,6 +77,12 @@ Currently implemented. This is a work in progress and open to change.
         # <parameter_name>: <parameter_value>
         name: value
 
+      # the type of authentication to use, valid values are !basic or !bearer
+      auth: !auth_type # valid enum values are !basic or !bearer
+        token: Optional<string> # in the case of !bearer authentication, provide the token to use
+        username: Optional<string> # in the case of !basic authentication, provide the username to use
+        password: Optional<string> # in the case of !basic authentication, provide the password to use
+
       # Optional body content (parsed to JSON)
       body:
         name: value # <property_name>: <property_value>
