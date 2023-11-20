@@ -62,8 +62,8 @@ corkscrew -f requests.yml get_comments
 Currently implemented. This is a work in progress and open to change.
 
 ```yaml
-- name: # name of the host (can be any string, it's not used to build the actual request)
-  host: # the host to which to make a request, e.g. example.com
+- name: Required<string> # name of the host (can be any string, it's not used to build the actual request)
+  host: Required<string> # the host to which to make a request, e.g. example.com
   scheme: Optional<http|https> # the scheme to use, e.g. https (default: http)
   port: Optional<number> # the port to use
   timeout: Optional<number> # number of seconds before timing out (default: 30)
