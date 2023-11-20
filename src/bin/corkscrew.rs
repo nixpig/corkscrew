@@ -11,15 +11,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let hosts = Hosts::from_str(&hosts_str)
         .expect("Configured hosts should be valid. See error(s) above for details.");
-    println!("hosts: {:#?}", hosts);
+    // println!("hosts: {:#?}", hosts);
 
     // 4. Validate and build requests from structs
-    let requests = Requests::from_hosts(hosts, &config)?;
-
-    println!("requests: {:#?}", requests);
-
     // 5. Execute requests and print to stdout
-    // Requests::exec(requests)?;
+    Requests::send_from_hosts(hosts, &config).await?;
 
     // request::exec(&config).await?;
 

@@ -5,19 +5,17 @@ use crate::{
 use std::error::Error;
 
 #[derive(Debug)]
-pub struct Requests {
-    data: Vec<reqwest::RequestBuilder>,
-}
+pub struct Requests {}
 
 impl Requests {
-    pub fn from_hosts(hosts: Hosts, config: &Config) -> Result<Self, Box<dyn Error>> {
+    pub async fn send_from_hosts(hosts: Hosts, config: &Config) -> Result<(), Box<dyn Error>> {
         let mut requests = vec![];
 
         hosts.data.iter().for_each(|host| {
             host.requests
                 .iter()
                 .filter(|request| {
-                    config.request_names.len() != 0 && !config.request_names.contains(&request.name)
+                    config.request_names.is_empty() || config.request_names.contains(&request.name)
                 })
                 .for_each(|request| {
                     let mut url = String::new();
@@ -39,7 +37,7 @@ impl Requests {
                     url.push_str("://");
                     url.push_str(&host.host);
                     if let Some(port) = &host.port {
-                        url.push_str(":");
+                        url.push_str(&String::from(":"));
                         url.push_str(&port.to_string());
                     }
 
@@ -48,7 +46,7 @@ impl Requests {
                     }
 
                     if let Some(hash) = &request.hash {
-                        url.push_str("#");
+                        url.push_str(&String::from("#"));
                         url.push_str(hash);
                     }
 
@@ -72,25 +70,21 @@ impl Requests {
                         body = b
                     }
 
-                    let request = reqwest::Client::new()
+                    let req = reqwest::Client::new()
                         .request(method, &url)
                         .headers(headers)
                         .json(body);
 
-                    requests.push(request);
-                })
+                    requests.push((&request.name, req));
+                });
         });
 
-        Ok(Requests { data: requests })
-    }
+        for (name, req) in requests {
+            let res = req.send().await?;
 
-    // execute synchronously
-    pub fn exec(&self) -> Result<(), Box<dyn Error>> {
-        todo!()
-    }
+            println!("{} | {}", name, res.status());
+        }
 
-    // execute asynchronously
-    pub async fn exec_async(&self) -> Result<(), Box<dyn Error>> {
-        todo!()
+        Ok(())
     }
 }
