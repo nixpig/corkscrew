@@ -62,6 +62,23 @@ corkscrew -f requests.yml get_comments
 1. `cargo build --release`
 1. `mv target/release/corkscrew ~/.local/bin/`
 
+```shell
+$ corkscrew --help
+
+A simple tool for executing HTTP requests defined in a YAML config. Written in Rust, btw.
+
+Usage: corkscrew [OPTIONS] [REQUEST_NAMES]...
+
+Arguments:
+  [REQUEST_NAMES]...
+
+Options:
+  -f, --file <file_path>  Path to file containing hosts and requests [default: hosts.yml]
+  -p, --parallel          Run requests in parallel
+  -h, --help              Print help
+  -V, --version           Print version
+```
+
 ## API
 
 Currently implemented. This is a work in progress and open to change.
