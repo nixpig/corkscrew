@@ -1,6 +1,8 @@
+use reqwest::header::HeaderValue;
+
 use crate::{
     config::Config,
-    hosts::{self, Hosts},
+    hosts::{self, Hosts, AuthType},
 };
 use std::error::Error;
 
@@ -63,6 +65,19 @@ impl Requests {
                     if let Some(h) = &request.headers {
                         headers = h.try_into().expect("Expected to receive valid headers.");
                     }
+
+
+                    if let Some(auth) = &request.auth {
+                        match auth {
+                            AuthType::Bearer { token } => {
+                                let bearer_token_header_value = HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
+                                headers.insert("Authorization", bearer_token_header_value);
+                            },
+                            AuthType::Basic { username, password } => {
+                                todo!("implement handling of basic auth");
+                            },
+                        };
+                    };
 
                     let mut body = &serde_json::Value::Null;
 
