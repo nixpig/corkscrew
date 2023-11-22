@@ -146,3 +146,7 @@ This is a personal project for me to learn Rust and is not currently open for co
 This may change in the future.
 
 Feel free to leave constructive comments, feedback or suggestions in the [issues](https://github.com/nixpig/corkscrew/issues).
+
+## TODO
+
+- Add option to parallelise request execution and specify number of threads.
