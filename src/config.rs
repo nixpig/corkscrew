@@ -1,7 +1,7 @@
 use crate::cli::Cli;
 use std::{error::Error, path::PathBuf};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Config {
     pub config_path: PathBuf,
     pub parallel: bool,
