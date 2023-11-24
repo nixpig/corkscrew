@@ -1,18 +1,18 @@
-use crate::build::{Build, BuildError};
+use serde::{Deserialize, Serialize};
+
 use crate::exec::{Exec, ExecError};
 use crate::load::{Load, LoadError};
 use crate::parse::{Parse, ParseError};
-use crate::request::{Request, RequestData};
+use crate::request::{AuthType, RequestData, RequestExec, UnwrappedRequestData};
 use std::fs;
 
 use crate::config::Config;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Requests {
     config: Config,
     requests_str: String,
     requests_data: Vec<RequestData>,
-    requests_exec: Vec<Request>,
 }
 
 impl Load for Requests {
@@ -25,45 +25,36 @@ impl Load for Requests {
 
 impl Parse for Requests {
     fn parse(&mut self) -> Result<&mut Self, ParseError> {
-        self.requests_data = serde_yaml::from_str(&self.requests_str)?;
-        Ok(self)
-    }
-}
+        let requests_data: Vec<RequestData> = serde_yaml::from_str(&self.requests_str)?;
 
-impl Build for Requests {
-    fn build(&mut self) -> Result<&mut Self, BuildError> {
-        // take self.request_data (Vec<RequestData>)
-        // recurse down through and build self.requests_exec (Vec<Request>)
-        //
+        // Flatten the requests
+        fn r(requests_data: &Vec<RequestData>, o: &mut Requests) {
+            for request_data in requests_data {
+                if let Some(requests) = &request_data.requests {
+                    r(requests, o);
+                }
+                // add props to capture
+                o.requests_data.push(RequestData::new());
 
-        fn r(data: &Vec<RequestData>) {
-            for request_data in data {
-                match &request_data.name {
-                    Some(v) => println!("has a name: {}", v),
-                    None => println!("no name"),
-                };
-
-                match &request_data.requests {
-                    Some(v) => {
-                        println!("has requests");
-                        r(v);
-                    }
-                    None => println!("no requests"),
-                };
+                if let Some(name) = request_data.name.clone() {
+                    let len = o.requests_data.len();
+                    o.requests_data[len - 1].name = Some(name);
+                }
             }
         }
 
-        r(&self.requests_data);
+        r(&requests_data, self);
+        println!("PARSED:");
+        println!("{:#?}", self.requests_data);
 
-        // println!("self.request_data: {:#?}", self.requests_data);
         Ok(self)
     }
 }
 
 impl Exec for Requests {
     fn exec(&self) -> Result<&Self, ExecError> {
-        for request in &self.requests_exec {
-            request.exec()?;
+        for request in &self.requests_data {
+            // exec
             todo!();
         }
 
@@ -77,7 +68,6 @@ impl Requests {
             config,
             requests_str: String::from(""),
             requests_data: vec![],
-            requests_exec: vec![],
         }
     }
 }

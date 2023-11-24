@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::cli::Cli;
 use std::{error::Error, path::PathBuf};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Config {
     pub config_path: PathBuf,
     pub parallel: bool,
