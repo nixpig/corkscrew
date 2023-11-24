@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::exec::{Exec, ExecError};
 use crate::load::{Load, LoadError};
 use crate::parse::{Parse, ParseError};
-use crate::request::{AuthType, RequestData, RequestExec, UnwrappedRequestData};
+use crate::request::{self, AuthType, RequestData, RequestExec};
 use std::fs;
 
 use crate::config::Config;
@@ -28,22 +28,28 @@ impl Parse for Requests {
         let requests_data: Vec<RequestData> = serde_yaml::from_str(&self.requests_str)?;
 
         // Flatten the requests
-        fn r(requests_data: &Vec<RequestData>, o: &mut Requests) {
-            for request_data in requests_data {
-                if let Some(requests) = &request_data.requests {
-                    r(requests, o);
-                }
-                // add props to capture
+        fn r(requests_data: &Vec<RequestData>, o: &mut Requests, parent_index: usize) {
+            for (i, request_data) in requests_data.iter().enumerate() {
                 o.requests_data.push(RequestData::new());
+                let len = o.requests_data.len();
 
                 if let Some(name) = request_data.name.clone() {
-                    let len = o.requests_data.len();
                     o.requests_data[len - 1].name = Some(name);
+                }
+
+                if let Some(host) = request_data.host.clone() {
+                    o.requests_data[len - 1].host = Some(host);
+                } else {
+                    o.requests_data[len - 1].host = o.requests_data[parent_index].host.clone();
+                }
+
+                if let Some(requests) = &request_data.requests {
+                    r(requests, o, len - 1);
                 }
             }
         }
 
-        r(&requests_data, self);
+        r(&requests_data, self, 0);
         println!("PARSED:");
         println!("{:#?}", self.requests_data);
 

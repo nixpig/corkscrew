@@ -70,23 +70,6 @@ impl RequestData {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct UnwrappedRequestData {
-    pub requests: Vec<RequestData>,
-    pub name: String,
-    pub host: String,
-    pub scheme: String,
-    pub port: u16,
-    pub timeout: u16,
-    pub resource: String,
-    pub method: Method,
-    pub hash: String,
-    pub params: HashMap<String, String>,
-    pub headers: HashMap<String, String>,
-    pub auth: AuthType,
-    pub body: serde_json::Value,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum AuthType {
     Basic { username: String, password: String },
