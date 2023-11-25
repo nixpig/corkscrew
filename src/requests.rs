@@ -1,79 +1,275 @@
+use reqwest::header::HeaderValue;
 use serde::{Deserialize, Serialize};
-
-use crate::exec::{Exec, ExecError};
-use crate::load::{Load, LoadError};
-use crate::parse::{Parse, ParseError};
-use crate::request::{self, AuthType, RequestData, RequestExec};
-use std::fs;
+use std::{collections::HashMap, error::Error, ops::Index, str::FromStr, time::Duration};
 
 use crate::config::Config;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Requests {
-    config: Config,
-    requests_str: String,
-    requests_data: Vec<RequestData>,
+    requests: Vec<RequestData>,
 }
 
-impl Load for Requests {
-    fn load(&mut self) -> Result<&mut Self, LoadError> {
-        self.requests_str = fs::read_to_string(&self.config.config_path)?;
-
-        Ok(self)
-    }
-}
-
-impl Parse for Requests {
-    fn parse(&mut self) -> Result<&mut Self, ParseError> {
-        let requests_data: Vec<RequestData> = serde_yaml::from_str(&self.requests_str)?;
-
-        // Flatten the requests
-        fn r(requests_data: &Vec<RequestData>, o: &mut Requests, parent_index: usize) {
-            for (i, request_data) in requests_data.iter().enumerate() {
-                o.requests_data.push(RequestData::new());
-                let len = o.requests_data.len();
-
-                if let Some(name) = request_data.name.clone() {
-                    o.requests_data[len - 1].name = Some(name);
-                }
-
-                if let Some(host) = request_data.host.clone() {
-                    o.requests_data[len - 1].host = Some(host);
-                } else {
-                    o.requests_data[len - 1].host = o.requests_data[parent_index].host.clone();
-                }
-
-                if let Some(requests) = &request_data.requests {
-                    r(requests, o, len - 1);
-                }
-            }
-        }
-
-        r(&requests_data, self, 0);
-        println!("PARSED:");
-        println!("{:#?}", self.requests_data);
-
-        Ok(self)
-    }
-}
-
-impl Exec for Requests {
-    fn exec(&self) -> Result<&Self, ExecError> {
-        for request in &self.requests_data {
-            // exec
-            todo!();
-        }
-
-        Ok(self)
+impl Default for Requests {
+    fn default() -> Requests {
+        Requests::new()
     }
 }
 
 impl Requests {
-    pub fn new(config: Config) -> Requests {
-        Requests {
-            config,
-            requests_str: String::from(""),
-            requests_data: vec![],
+    fn new() -> Requests {
+        Requests { requests: vec![] }
+    }
+
+    pub async fn exec(&self, config: &Config) -> Result<(), Box<dyn Error>> {
+        for request in self.requests.iter().filter(|r| {
+            let has_resource = r.resource.is_some();
+            let has_name = r.name.is_some();
+            let run_all = config.request_names.is_empty();
+
+            if has_resource && has_name {
+                if run_all {
+                    true
+                } else {
+                    return config.request_names.contains(r.name.as_ref().unwrap());
+                }
+            } else {
+                false
+            }
+        }) {
+            let mut url = String::from("");
+
+            match &request.scheme {
+                Some(scheme) => url.push_str(scheme),
+                None => url.push_str("http"),
+            }
+
+            url.push_str("://");
+
+            match &request.host {
+                Some(host) => url.push_str(host),
+                None => panic!("Host is required"),
+            }
+
+            if let Some(port) = &request.port {
+                url.push_str(&format!(":{port}"));
+            }
+
+            if let Some(resource) = &request.resource {
+                url.push_str(resource);
+            }
+
+            if let Some(hash) = &request.hash {
+                url.push_str(&format!("#{hash}"));
+            }
+
+            let mut headers = reqwest::header::HeaderMap::new();
+            if let Some(h) = &request.headers {
+                headers = h.try_into().expect("Expected to receive valid headers.")
+            }
+
+            if let Some(auth) = &request.auth {
+                match auth {
+                    AuthType::Bearer { token } => {
+                        let bearer_token_header_value =
+                            HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
+                        headers.append("Authorization", bearer_token_header_value);
+                    }
+                    AuthType::Basic { username, password } => todo!("implement basic auth"),
+                }
+            }
+
+            let mut body = &serde_json::Value::Null;
+            if let Some(b) = &request.body {
+                body = b;
+            }
+
+            let method = match &request.method {
+                Some(m) => Method {}[m].clone(),
+                None => Method {}["get"].clone(),
+            };
+
+            let mut params = HashMap::new();
+            if let Some(p) = &request.params {
+                for (name, value) in p.iter() {
+                    params.insert(name, value);
+                }
+            }
+
+            let timeout = request.timeout.unwrap_or(10);
+
+            let req = reqwest::Client::new()
+                .request(method, &url)
+                .timeout(Duration::from_secs(timeout))
+                .headers(headers)
+                .query(&params)
+                .json(body);
+
+            let res = req.send().await?;
+            println!("Name: {}", request.name.as_ref().unwrap());
+            println!("Resource: {}", request.resource.as_ref().unwrap());
+            println!("{:?} - {:?}", res.status(), res.url().to_string());
+
+            let text = res.text().await?;
+            // println!("{:#?}", text);
+
+            let json: serde_json::Value = serde_json::from_str(&text).expect("should decode");
+            println!("{:#?}", json);
+
+            println!("-----")
+        }
+
+        Ok(())
+    }
+
+    fn parse(src: &Vec<RequestData>, target: &mut Requests, parent_index: usize) {
+        for request_data in src {
+            target.requests.push(RequestData::new());
+            let pos = target.requests.len() - 1;
+
+            if let Some(name) = &request_data.name {
+                target.requests[pos].name = Some(name.clone());
+            } else {
+                panic!("All requests must have a name.");
+            }
+
+            target.requests[pos].host = match &request_data.host {
+                Some(host) => Some(host.clone()),
+                None => target.requests[parent_index].host.clone(),
+            };
+
+            target.requests[pos].scheme = match &request_data.scheme {
+                Some(scheme) => Some(scheme.clone()),
+                None => target.requests[parent_index].scheme.clone(),
+            };
+
+            target.requests[pos].port = match request_data.port {
+                Some(port) => Some(port),
+                None => target.requests[parent_index].port,
+            };
+
+            target.requests[pos].timeout = match request_data.timeout {
+                Some(timeout) => Some(timeout),
+                None => target.requests[parent_index].timeout,
+            };
+
+            target.requests[pos].resource = match &request_data.resource {
+                Some(resource) => Some(resource.clone()),
+                None => target.requests[parent_index].resource.clone(),
+            };
+
+            target.requests[pos].method = match &request_data.method {
+                Some(method) => Some(method.clone()),
+                None => target.requests[parent_index].method.clone(),
+            };
+
+            target.requests[pos].hash = match &request_data.hash {
+                Some(hash) => Some(hash.clone()),
+                None => target.requests[parent_index].hash.clone(),
+            };
+
+            target.requests[pos].params = match &request_data.params {
+                Some(params) => Some(params.clone()),
+                None => target.requests[parent_index].params.clone(),
+            };
+
+            target.requests[pos].headers = match &request_data.headers {
+                Some(headers) => Some(headers.clone()),
+                None => target.requests[parent_index].headers.clone(),
+            };
+
+            // o.requests[pos].auth = match request_data.auth {
+            //     Some(auth) => Some(auth),
+            //     None => o.requests[parent_index].auth,
+            // };
+
+            target.requests[pos].body = match &request_data.body {
+                Some(body) => Some(body.clone()),
+                None => target.requests[parent_index].body.clone(),
+            };
+
+            if let Some(requests) = &request_data.requests {
+                Requests::parse(requests, target, pos);
+            }
+        }
+    }
+}
+
+impl FromStr for Requests {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Requests, Self::Err> {
+        let yml: &Vec<RequestData> = &serde_yaml::from_str(s).unwrap();
+        let mut flat_requests = Requests::new();
+        Requests::parse(yml, &mut flat_requests, 0);
+
+        Ok(flat_requests)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct RequestData {
+    pub requests: Option<Vec<RequestData>>,
+    pub name: Option<String>,
+    pub host: Option<String>,
+    pub scheme: Option<String>,
+    pub port: Option<u16>,
+    pub timeout: Option<u64>,
+    pub resource: Option<String>,
+    pub method: Option<String>,
+    pub hash: Option<String>,
+    pub params: Option<HashMap<String, String>>,
+    pub headers: Option<HashMap<String, String>>,
+    pub auth: Option<AuthType>,
+    pub body: Option<serde_json::Value>,
+}
+
+impl Default for RequestData {
+    fn default() -> RequestData {
+        RequestData::new()
+    }
+}
+
+impl RequestData {
+    pub fn new() -> RequestData {
+        RequestData {
+            requests: None,
+            name: None,
+            host: None,
+            scheme: None,
+            port: None,
+            timeout: None,
+            resource: None,
+            method: None,
+            hash: None,
+            params: None,
+            headers: None,
+            auth: None,
+            body: None,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum AuthType {
+    Basic { username: String, password: String },
+    Bearer { token: String },
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub struct Method {}
+impl Index<&'_ str> for Method {
+    type Output = reqwest::Method;
+
+    fn index(&self, index: &str) -> &reqwest::Method {
+        match index {
+            "get" => &reqwest::Method::GET,
+            "post" => &reqwest::Method::POST,
+            "put" => &reqwest::Method::PUT,
+            "patch" => &reqwest::Method::PATCH,
+            "delete" => &reqwest::Method::DELETE,
+            _ => &reqwest::Method::GET,
         }
     }
 }
