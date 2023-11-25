@@ -77,10 +77,12 @@ impl Requests {
                 headers = h.try_into().expect("Expected to receive valid headers.")
             }
 
-            let mut body = &serde_json::Value::Null;
-            if let Some(b) = &request.body {
-                body = b;
-            }
+            // let mut body = &serde_json::Value::Null;
+            // if let Some(b) = &request.body {
+            //     body = b;
+            // }
+
+            let body = &request.body.clone().unwrap_or(serde_json::Value::Null);
 
             let method = match &request.method {
                 Some(m) => Method {}[m].clone(),
