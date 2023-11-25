@@ -271,46 +271,43 @@ impl Index<&'_ str> for Method {
     }
 }
 
-// #[cfg(test)]
-// mod test {
-//     use std::collections::HashMap;
-//     use std::str::FromStr;
-//
-//     use super::{AuthType, Host, Hosts, RequestParseError, Method, Request, Timeout};
-//
-//     #[test]
-//     fn test_parse_required_fields() -> Result<(), RequestParseError> {
-//         let hosts_str_required_fields = "
-// - name: test_required_fields
-//   host: localhost
-//   requests:
-//     - name: test_request_name
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_required_fields)?;
-//
-//         let expected = Hosts::new(vec![Host {
-//             name: String::from("test_required_fields"),
-//             host: String::from("localhost"),
-//             port: None,
-//             scheme: None,
-//             timeout: Timeout(30),
-//             requests: vec![Request {
-//                 auth: None,
-//                 body: None,
-//                 hash: None,
-//                 headers: None,
-//                 method: Method::Get,
-//                 params: None,
-//                 resource: None,
-//                 name: String::from("test_request_name"),
-//             }],
-//         }]);
-//
-//         assert_eq!(hosts, expected);
-//
-//         Ok(())
-//     }
+#[cfg(test)]
+mod test {
+    use std::{error::Error, str::FromStr};
+
+    use crate::requests::{RequestData, Requests};
+
+    #[test]
+    fn test_parse_required_fields() -> Result<(), Box<dyn Error>> {
+        let hosts_str_required_fields = "
+- name: test_required_fields
+  host: localhost
+  resource: /api
+";
+
+        let maker = Requests::from_str(hosts_str_required_fields)?;
+
+        let expected = vec![RequestData {
+            name: Some(String::from("test_required_fields")),
+            host: Some(String::from("localhost")),
+            port: None,
+            scheme: None,
+            timeout: None,
+            auth: None,
+            body: None,
+            hash: None,
+            headers: None,
+            method: None,
+            params: None,
+            resource: Some(String::from("/api")),
+            requests: None,
+        }];
+
+        assert_eq!(maker.requests, expected);
+
+        Ok(())
+    }
+}
 //
 //     #[test]
 //     fn test_parse_enum_fields() -> Result<(), RequestParseError> {
