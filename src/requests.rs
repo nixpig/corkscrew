@@ -21,22 +21,20 @@ impl Requests {
     }
 
     pub async fn exec(&self, config: &Config) -> Result<(), Box<dyn Error>> {
-        for request in self.requests.iter().filter(|r| {
+        let requests = self.requests.iter().filter(|r| {
             let has_resource = r.resource.is_some();
             let has_name = r.name.is_some();
             let run_all = config.request_names.is_empty();
 
-            if has_resource && has_name {
-                if run_all {
-                    true
-                } else {
-                    return config.request_names.contains(r.name.as_ref().unwrap());
-                }
-            } else {
-                false
-            }
-        }) {
+            return has_resource
+                && has_name
+                && (run_all || config.request_names.contains(r.name.as_ref().unwrap()));
+        });
+
+        for request in requests {
             let mut url = String::from("");
+            let mut headers = reqwest::header::HeaderMap::new();
+            let mut params = HashMap::new();
 
             match &request.scheme {
                 Some(scheme) => url.push_str(scheme),
@@ -44,6 +42,19 @@ impl Requests {
             }
 
             url.push_str("://");
+
+            if let Some(auth) = &request.auth {
+                match auth {
+                    AuthType::Bearer { token } => {
+                        let bearer_token_header_value =
+                            HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
+                        headers.append("Authorization", bearer_token_header_value);
+                    }
+                    AuthType::Basic { username, password } => {
+                        url.push_str(&format!("{username}:{password}"));
+                    }
+                }
+            }
 
             match &request.host {
                 Some(host) => url.push_str(host),
@@ -62,20 +73,8 @@ impl Requests {
                 url.push_str(&format!("#{hash}"));
             }
 
-            let mut headers = reqwest::header::HeaderMap::new();
             if let Some(h) = &request.headers {
                 headers = h.try_into().expect("Expected to receive valid headers.")
-            }
-
-            if let Some(auth) = &request.auth {
-                match auth {
-                    AuthType::Bearer { token } => {
-                        let bearer_token_header_value =
-                            HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
-                        headers.append("Authorization", bearer_token_header_value);
-                    }
-                    AuthType::Basic { username, password } => todo!("implement basic auth"),
-                }
             }
 
             let mut body = &serde_json::Value::Null;
@@ -88,7 +87,6 @@ impl Requests {
                 None => Method {}["get"].clone(),
             };
 
-            let mut params = HashMap::new();
             if let Some(p) = &request.params {
                 for (name, value) in p.iter() {
                     params.insert(name, value);
@@ -110,7 +108,6 @@ impl Requests {
             println!("{:?} - {:?}", res.status(), res.url().to_string());
 
             let text = res.text().await?;
-            // println!("{:#?}", text);
 
             let json: serde_json::Value = serde_json::from_str(&text).expect("should decode");
             println!("{:#?}", json);
