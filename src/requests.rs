@@ -174,10 +174,10 @@ impl Requests {
                 None => target.requests[parent_index].headers.clone(),
             };
 
-            // o.requests[pos].auth = match request_data.auth {
-            //     Some(auth) => Some(auth),
-            //     None => o.requests[parent_index].auth,
-            // };
+            target.requests[pos].auth = match &request_data.auth {
+                Some(auth) => Some(auth.clone()),
+                None => target.requests[parent_index].auth.clone(),
+            };
 
             target.requests[pos].body = match &request_data.body {
                 Some(body) => Some(body.clone()),
@@ -246,7 +246,7 @@ impl RequestData {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum AuthType {
     Basic { username: String, password: String },
