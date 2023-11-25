@@ -285,9 +285,9 @@ mod test {
   resource: /api
 ";
 
-        let maker = Requests::from_str(hosts_str_required_fields)?;
+        let got = Requests::from_str(hosts_str_required_fields)?;
 
-        let expected = vec![RequestData {
+        let want = vec![RequestData {
             name: Some(String::from("test_required_fields")),
             host: Some(String::from("localhost")),
             port: None,
@@ -303,7 +303,7 @@ mod test {
             requests: None,
         }];
 
-        assert_eq!(maker.requests, expected);
+        assert_eq!(got.requests, want);
 
         Ok(())
     }
