@@ -15,7 +15,7 @@ impl TryFrom<Cli> for Config {
 
     fn try_from(value: Cli) -> Result<Self, Box<dyn Error>> {
         let parallel = value.parallel.unwrap_or(false);
-        let config_file = value.config_path.unwrap_or(PathBuf::from("hosts.yml"));
+        let config_file = value.config_path.unwrap_or(PathBuf::from("requests.yml"));
         let request_names = value.request_names;
 
         Ok(Config {
@@ -41,7 +41,7 @@ mod test {
         }
         .try_into()?;
 
-        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert_eq!(config.config_path, PathBuf::from("requests.yml"));
         assert!(!config.parallel);
         assert_eq!(config.request_names, vec![] as Vec<String>);
 
@@ -73,7 +73,7 @@ mod test {
         }
         .try_into()?;
 
-        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert_eq!(config.config_path, PathBuf::from("requests.yml"));
         assert!(config.parallel);
         assert_eq!(config.request_names, vec![] as Vec<String>);
 
@@ -93,7 +93,7 @@ mod test {
         }
         .try_into()?;
 
-        assert_eq!(config.config_path, PathBuf::from("hosts.yml"));
+        assert_eq!(config.config_path, PathBuf::from("requests.yml"));
         assert!(!config.parallel);
         assert_eq!(
             config.request_names,

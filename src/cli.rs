@@ -13,9 +13,9 @@ pub struct Cli {
     #[clap(
         short = 'f',
         long = "file",
-        default_value = "hosts.yml",
+        default_value = "requests.yml",
         name = "file_path",
-        help = "Path to file containing hosts and requests"
+        help = "Path to file containing requests"
     )]
     pub config_path: Option<PathBuf>,
 
