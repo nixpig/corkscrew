@@ -1,16 +1,4 @@
 ---
-# - name: test_minimum_config_local
-#   host: localhost
-#   scheme: http
-#   requests:
-#     - name: local_test_0
-#     - name: local_test_1
-#     - name: local_test_2
-#       requests:
-#         - name: local_test_4
-#           host: localhost22
-#         - name: local_test_5
-
 - name: test_all_methods
   host: jsonplaceholder.typicode.com
   scheme: https
