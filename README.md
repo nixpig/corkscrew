@@ -178,7 +178,6 @@ Feel free to leave constructive comments, feedback or suggestions in the [issues
 - Add option to parallelise request execution and specify number of threads, e.g. `--parallel 4`.
 - Add option to output various data from request response.
 - Show some 'in progress' message/counter.
-- Maybe change the structure of `host -> request` to be like `request|request_group -> Optional(request|request_group) -> Optional(request|request_group) -> etc...`.
 - Improve structure and algorithm of request struct recursion.
-- Add option to specify requests by `host:request` or `request_group:request_group` / `request_group:request` in case of structural change above..
+- Add option to specify nested groups of requests by `request:request` / `request_group:request_group` / `request_group:request`.
 - Make the parser option configurable, e.g. `corkscrew --parser json`, to implement different parsers instead of YAML.
