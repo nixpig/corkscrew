@@ -270,9 +270,9 @@ impl Index<&'_ str> for Method {
 
 #[cfg(test)]
 mod test {
-    use std::{error::Error, str::FromStr};
+    use std::{collections::HashMap, error::Error, str::FromStr};
 
-    use crate::requests::{RequestData, Requests};
+    use crate::requests::{AuthType, RequestData, Requests};
 
     #[test]
     fn test_parse_required_fields() -> Result<(), Box<dyn Error>> {
@@ -304,281 +304,281 @@ mod test {
 
         Ok(())
     }
+
+    #[test]
+    fn test_parse_nested_required_fields() -> Result<(), Box<dyn Error>> {
+        let hosts_str_required_fields = "
+- name: test_nested_required_fields
+  host: localhost.1
+  requests:
+    - name: test_nested_required_fields_1
+      resource: /api/1
+    - name: test_nested_required_fields_2
+      host: localhost.2
+      resource: /api/2
+      requests:
+        - name: test_nested_required_fields_3
+          host: localhost.3
+          resource: /api/3
+";
+
+        let got = Requests::from_str(hosts_str_required_fields)?;
+
+        let want = vec![
+            RequestData {
+                name: Some(String::from("test_nested_required_fields")),
+                host: Some(String::from("localhost.1")),
+                port: None,
+                scheme: None,
+                timeout: None,
+                auth: None,
+                body: None,
+                hash: None,
+                headers: None,
+                method: None,
+                params: None,
+                resource: None,
+                requests: None,
+            },
+            RequestData {
+                name: Some(String::from("test_nested_required_fields_1")),
+                host: Some(String::from("localhost.1")),
+                port: None,
+                scheme: None,
+                timeout: None,
+                auth: None,
+                body: None,
+                hash: None,
+                headers: None,
+                method: None,
+                params: None,
+                resource: Some(String::from("/api/1")),
+                requests: None,
+            },
+            RequestData {
+                name: Some(String::from("test_nested_required_fields_2")),
+                host: Some(String::from("localhost.2")),
+                port: None,
+                scheme: None,
+                timeout: None,
+                auth: None,
+                body: None,
+                hash: None,
+                headers: None,
+                method: None,
+                params: None,
+                resource: Some(String::from("/api/2")),
+                requests: None,
+            },
+            RequestData {
+                name: Some(String::from("test_nested_required_fields_3")),
+                host: Some(String::from("localhost.3")),
+                port: None,
+                scheme: None,
+                timeout: None,
+                auth: None,
+                body: None,
+                hash: None,
+                headers: None,
+                method: None,
+                params: None,
+                resource: Some(String::from("/api/3")),
+                requests: None,
+            },
+        ];
+
+        assert_eq!(got.requests, want);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_auth_basic() -> Result<(), Box<dyn Error>> {
+        let requests_str_basic_auth = "
+- name: test_basic_auth
+  host: localhost
+  auth: !basic
+    username: test_username
+    password: test_password
+";
+
+        let got = Requests::from_str(requests_str_basic_auth)?;
+
+        let want = vec![RequestData {
+            name: Some(String::from("test_basic_auth")),
+            host: Some(String::from("localhost")),
+            port: None,
+            timeout: None,
+            scheme: None,
+            auth: Some(AuthType::Basic {
+                username: String::from("test_username"),
+                password: String::from("test_password"),
+            }),
+            body: None,
+            hash: None,
+            headers: None,
+            method: None,
+            params: None,
+            resource: None,
+            requests: None,
+        }];
+
+        assert_eq!(got.requests, want);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_bearer_auth() -> Result<(), Box<dyn Error>> {
+        let requests_str_bearer_auth = "
+- name: test_bearer_auth
+  host: localhost
+  auth: !bearer
+    token: 50m3.b34r3r.t0k?n
+";
+
+        let got = Requests::from_str(requests_str_bearer_auth)?;
+
+        let want = vec![RequestData {
+            name: Some(String::from("test_bearer_auth")),
+            host: Some(String::from("localhost")),
+            port: None,
+            timeout: None,
+            scheme: None,
+            auth: Some(AuthType::Bearer {
+                token: String::from("50m3.b34r3r.t0k?n"),
+            }),
+            body: None,
+            hash: None,
+            headers: None,
+            method: None,
+            params: None,
+            resource: None,
+            requests: None,
+        }];
+
+        assert_eq!(got.requests, want);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_all_unconstrained_fields() -> Result<(), Box<dyn Error>> {
+        let requests_str_all_unconstrained_fields = "
+    - name: test_unconstrained_fields
+      host: localhost
+      timeout: 15
+      port: 3000
+      scheme: https
+      requests:
+        - name: test_post_1
+          method: post
+          resource: /api/test_1
+          hash: hash_location_1
+          headers:
+            Accept-Language: en-US,en;q=0.8
+            User-Agent: Mozilla/5.0 Firefox/50.0
+          params:
+            param1: value1
+            param2: value2
+          body:
+            prop1a: val1a
+            prop1b:
+              prop2a: val2a
+              prop2b:
+                prop3a: val3a
+                prop3b: val3b
+        - name: test_post_2
+          method: patch
+          resource: /api/test_2
+          hash: hash_location_2
+          params:
+            paramA: valueA
+            paramB: valueB
+
+    ";
+
+        let got = Requests::from_str(requests_str_all_unconstrained_fields)?;
+
+        let want = vec![
+            RequestData {
+                name: Some(String::from("test_unconstrained_fields")),
+                host: Some(String::from("localhost")),
+                timeout: Some(15),
+                port: Some(3000),
+                scheme: Some(String::from("https")),
+                body: None,
+                auth: None,
+                hash: None,
+                headers: None,
+                method: None,
+                params: None,
+                resource: None,
+                requests: None,
+            },
+            RequestData {
+                name: Some(String::from("test_post_1")),
+                method: Some(String::from("post")),
+                resource: Some(String::from("/api/test_1")),
+                hash: Some(String::from("hash_location_1")),
+                host: Some(String::from("localhost")),
+                port: Some(3000),
+                timeout: Some(15),
+                scheme: Some(String::from("https")),
+                requests: None,
+                auth: None,
+                headers: Some(HashMap::from([
+                    (
+                        String::from("Accept-Language"),
+                        String::from("en-US,en;q=0.8"),
+                    ),
+                    (
+                        String::from("User-Agent"),
+                        String::from("Mozilla/5.0 Firefox/50.0"),
+                    ),
+                ])),
+                params: Some(HashMap::from([
+                    (String::from("param1"), String::from("value1")),
+                    (String::from("param2"), String::from("value2")),
+                ])),
+                body: Some(
+                    serde_json::from_str(
+                        "{
+                                \"prop1a\": \"val1a\",
+                                \"prop1b\": {
+                                    \"prop2a\": \"val2a\",
+                                    \"prop2b\": {
+                                        \"prop3a\": \"val3a\",
+                                        \"prop3b\": \"val3b\"
+                                    }
+                                }
+                            }",
+                    )
+                    .unwrap(),
+                ),
+            },
+            RequestData {
+                name: Some(String::from("test_post_2")),
+                method: Some(String::from("patch")),
+                resource: Some(String::from("/api/test_2")),
+                hash: Some(String::from("hash_location_2")),
+                host: Some(String::from("localhost")),
+                port: Some(3000),
+                timeout: Some(15),
+                scheme: Some(String::from("https")),
+                requests: None,
+                auth: None,
+                body: None,
+                headers: None,
+                params: Some(HashMap::from([
+                    (String::from("paramA"), String::from("valueA")),
+                    (String::from("paramB"), String::from("valueB")),
+                ])),
+            },
+        ];
+
+        assert_eq!(got.requests, want);
+
+        Ok(())
+    }
 }
-//
-//     #[test]
-//     fn test_parse_enum_fields() -> Result<(), RequestParseError> {
-//         let hosts_str_enum_fields = "
-// - name: test_enum_fields
-//   host: localhost
-//   timeout: 10
-//   requests:
-//     - name: test_post
-//       method: !post
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_enum_fields)?;
-//
-//         let expected = Hosts::new(vec![Host {
-//             name: String::from("test_enum_fields"),
-//             host: String::from("localhost"),
-//             scheme: None,
-//             timeout: Timeout(10),
-//             port: None,
-//             requests: vec![Request {
-//                 name: String::from("test_post"),
-//                 method: Method::Post,
-//                 auth: None,
-//                 body: None,
-//                 hash: None,
-//                 headers: None,
-//                 params: None,
-//                 resource: None,
-//             }],
-//         }]);
-//
-//         assert_eq!(hosts, expected);
-//         Ok(())
-//     }
-//
-//     #[test]
-//     fn test_parse_all_unconstrained_fields() -> Result<(), RequestParseError> {
-//         let hosts_str_all_unconstrained_fields = "
-// - name: test_unconstrained_fields
-//   host: localhost
-//   timeout: 15
-//   port: 3000
-//   scheme: https
-//   requests:
-//     - name: test_post
-//       method: !post
-//       resource: /api/test
-//       hash: hash_location
-//       headers:
-//         Accept-Language: en-US,en;q=0.8
-//         User-Agent: Mozilla/5.0 Firefox/50.0
-//       params:
-//         param1: value1
-//         param2: value2
-//       body:
-//         prop1a: val1a
-//         prop1b:
-//           prop2a: val2a
-//           prop2b:
-//             prop3a: val3a
-//             prop3b: val3b
-//
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_all_unconstrained_fields)?;
-//
-//         let expected = Hosts::new(vec![Host {
-//             name: String::from("test_unconstrained_fields"),
-//             host: String::from("localhost"),
-//             timeout: Timeout(15),
-//             port: Some(3000),
-//             scheme: Some(String::from("https")),
-//             requests: vec![Request {
-//                 name: String::from("test_post"),
-//                 method: Method::Post,
-//                 resource: Some(String::from("/api/test")),
-//                 hash: Some(String::from("hash_location")),
-//                 headers: Some(HashMap::from([
-//                     (
-//                         String::from("Accept-Language"),
-//                         String::from("en-US,en;q=0.8"),
-//                     ),
-//                     (
-//                         String::from("User-Agent"),
-//                         String::from("Mozilla/5.0 Firefox/50.0"),
-//                     ),
-//                 ])),
-//                 params: Some(HashMap::from([
-//                     (String::from("param1"), String::from("value1")),
-//                     (String::from("param2"), String::from("value2")),
-//                 ])),
-//                 body: Some(
-//                     serde_json::from_str(
-//                         "{
-//                             \"prop1a\": \"val1a\",
-//                             \"prop1b\": {
-//                                 \"prop2a\": \"val2a\",
-//                                 \"prop2b\": {
-//                                     \"prop3a\": \"val3a\",
-//                                     \"prop3b\": \"val3b\"
-//                                 }
-//                             }
-//                         }",
-//                     )
-//                     .unwrap(),
-//                 ),
-//                 auth: None,
-//             }],
-//         }]);
-//
-//         assert_eq!(hosts, expected);
-//
-//         Ok(())
-//     }
-//
-//     #[test]
-//     fn test_parse_auth_basic() -> Result<(), RequestParseError> {
-//         let hosts_str_basic_auth = "
-// - name: test_basic_auth
-//   host: localhost
-//   scheme: http
-//   requests:
-//     - name: basic_auth_request
-//       auth: !basic
-//         username: test_username
-//         password: test_password
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_basic_auth)?;
-//
-//         let expected = Hosts::new(vec![Host {
-//             name: String::from("test_basic_auth"),
-//             host: String::from("localhost"),
-//             port: None,
-//             timeout: Timeout(30),
-//             scheme: Some(String::from("http")),
-//             requests: vec![Request {
-//                 name: String::from("basic_auth_request"),
-//                 auth: Some(AuthType::Basic {
-//                     username: String::from("test_username"),
-//                     password: String::from("test_password"),
-//                 }),
-//                 body: None,
-//                 hash: None,
-//                 headers: None,
-//                 method: Method::Get,
-//                 params: None,
-//                 resource: None,
-//             }],
-//         }]);
-//
-//         assert_eq!(hosts, expected);
-//
-//         Ok(())
-//     }
-//
-//     #[test]
-//     fn test_parse_auth_bearer() -> Result<(), RequestParseError> {
-//         let hosts_str_bearer_auth = "
-// - name: test_bearer_auth
-//   host: localhost
-//   requests:
-//     - name: bearer_auth_request
-//       auth: !bearer
-//         token: abcd$1234.231&4dfs-asdfjsdv.vsd
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_bearer_auth)?;
-//
-//         let expected = Hosts::new(vec![Host {
-//             name: String::from("test_bearer_auth"),
-//             host: String::from("localhost"),
-//             port: None,
-//             scheme: None,
-//             timeout: Timeout(30),
-//             requests: vec![Request {
-//                 name: String::from("bearer_auth_request"),
-//                 auth: Some(AuthType::Bearer {
-//                     token: String::from("abcd$1234.231&4dfs-asdfjsdv.vsd"),
-//                 }),
-//                 body: None,
-//                 hash: None,
-//                 headers: None,
-//                 method: Method::Get,
-//                 params: None,
-//                 resource: None,
-//             }],
-//         }]);
-//
-//         assert_eq!(hosts, expected);
-//
-//         Ok(())
-//     }
-//
-//     #[test]
-//     fn test_parse_multiple_hosts() -> Result<(), RequestParseError> {
-//         let hosts_str_multiple = "
-// - name: test_host_1
-//   host: foo.localhost
-//   requests:
-//     - name: test_host_1_post_1
-//     - name: test_host_1_post_2
-// - name: test_host_2
-//   host: bar.localhost
-//   requests:
-//     - name: test_host_2_post_1
-//     - name: test_host_2_post_2
-// ";
-//
-//         let hosts = Hosts::from_str(hosts_str_multiple)?;
-//
-//         let expected = Hosts::new(vec![
-//             Host {
-//                 name: String::from("test_host_1"),
-//                 host: String::from("foo.localhost"),
-//                 timeout: Timeout(30),
-//                 port: None,
-//                 scheme: None,
-//                 requests: vec![
-//                     Request {
-//                         name: String::from("test_host_1_post_1"),
-//                         method: Method::Get,
-//                         auth: None,
-//                         body: None,
-//                         hash: None,
-//                         headers: None,
-//                         params: None,
-//                         resource: None,
-//                     },
-//                     Request {
-//                         name: String::from("test_host_1_post_2"),
-//                         method: Method::Get,
-//                         auth: None,
-//                         body: None,
-//                         hash: None,
-//                         headers: None,
-//                         params: None,
-//                         resource: None,
-//                     },
-//                 ],
-//             },
-//             Host {
-//                 name: String::from("test_host_2"),
-//                 host: String::from("bar.localhost"),
-//                 timeout: Timeout(30),
-//                 scheme: None,
-//                 port: None,
-//                 requests: vec![
-//                     Request {
-//                         name: String::from("test_host_2_post_1"),
-//                         method: Method::Get,
-//                         auth: None,
-//                         body: None,
-//                         hash: None,
-//                         headers: None,
-//                         params: None,
-//                         resource: None,
-//                     },
-//                     Request {
-//                         name: String::from("test_host_2_post_2"),
-//                         method: Method::Get,
-//                         auth: None,
-//                         body: None,
-//                         hash: None,
-//                         headers: None,
-//                         params: None,
-//                         resource: None,
-//                     },
-//                 ],
-//             },
-//         ]);
-//
-//         assert_eq!(hosts, expected);
-//         Ok(())
-//     }
-// }
