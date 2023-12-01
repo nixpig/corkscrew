@@ -4,10 +4,6 @@ A simple tool for executing HTTP requests configured in YAML. Written in Rust, b
 
 > 🦀 This is my first ever project in Rust. No doubt there's going to me many things that can be improved upon. Happy to receive constructive suggestions in [issues](https://github.com/nixpig/corkscrew/issues).
 
-## Examples
-
-**Execute all requests in `requests.yml` file:**
-
 ```shell
 $ corkscrew --help
 
@@ -24,6 +20,10 @@ Options:
   -h, --help              Print help
   -V, --version           Print version
 ```
+
+## Examples
+
+**Execute all requests in `requests.yml` file:**
 
 ```shell
 $ corkscrew
