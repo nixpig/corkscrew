@@ -1,8 +1,23 @@
+use cli_table;
 use reqwest::header::HeaderValue;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error, ops::Index, str::FromStr, time::Duration};
 
 use crate::config::Config;
+
+#[derive(cli_table::Table)]
+pub struct Output {
+    #[table(title = "#")]
+    num: usize,
+    #[table(title = "Name")]
+    name: String,
+    #[table(title = "Method")]
+    method: String,
+    #[table(title = "Resource")]
+    resource: String,
+    #[table(title = "Status")]
+    status: String,
+}
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Requests {
@@ -20,7 +35,9 @@ impl Requests {
         Requests { requests: vec![] }
     }
 
-    pub async fn exec(&self, config: &Config) -> Result<(), Box<dyn Error>> {
+    pub async fn exec(&self, config: &Config) -> Result<Vec<Output>, Box<dyn Error>> {
+        let mut output: Vec<Output> = vec![];
+
         let requests = self.requests.iter().filter(|r| {
             let has_resource = r.resource.is_some();
             let has_name = r.name.is_some();
@@ -103,22 +120,25 @@ impl Requests {
 
             let name = request.name.as_ref().unwrap();
             let status = res.status();
-            let resource = request.resource.as_ref().unwrap();
             let method = request.method.as_ref().unwrap();
-
             let url = res.url().to_string();
+            let resource = request.resource.as_ref().unwrap();
 
-            println!("{num} | {name} | {method} | {url} | {status} |");
+            output.push(Output {
+                num,
+                resource: String::from(resource),
+                name: String::from(name),
+                status: status.to_string(),
+                method: method.to_string(),
+            });
 
             let text = res.text().await?;
 
             let json: serde_json::Value = serde_json::from_str(&text).expect("should decode");
             // println!("{:#?}", json);
-
-            println!("-----")
         }
 
-        Ok(())
+        Ok(output)
     }
 
     fn parse(src: &Vec<RequestData>, target: &mut Requests, parent_index: usize) {
