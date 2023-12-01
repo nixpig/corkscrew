@@ -19,10 +19,10 @@ Arguments:
   [REQUEST_NAMES]...
 
 Options:
-  -f, --file <file_path>        Path to file containing requests [default: requests.yml]
-  -p, --parallel <num_threads>  Specify number of parallel threads
-  -h, --help                    Print help
-  -V, --version                 Print version
+  -f, --file <file_path>  Path to file containing requests [default: requests.yml]
+  -p, --parallel <num>    Specify number of parallel requests
+  -h, --help              Print help
+  -V, --version           Print version
 ```
 
 ```shell

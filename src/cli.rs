@@ -22,8 +22,8 @@ pub struct Cli {
     #[clap(
         short = 'p',
         long = "parallel",
-        name = "num_threads",
-        help = "Specify number of parallel threads"
+        name = "num",
+        help = "Specify number of parallel requests"
     )]
     pub parallel: Option<usize>,
 }
