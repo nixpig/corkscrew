@@ -31,7 +31,7 @@ impl Requests {
                 && (run_all || config.request_names.contains(r.name.as_ref().unwrap()));
         });
 
-        for request in requests {
+        for (num, request) in requests.enumerate() {
             let mut url = String::from("");
             let mut headers = reqwest::header::HeaderMap::new();
             let mut params = HashMap::new();
@@ -100,14 +100,20 @@ impl Requests {
                 .json(body);
 
             let res = req.send().await?;
-            println!("Name: {}", request.name.as_ref().unwrap());
-            println!("Resource: {}", request.resource.as_ref().unwrap());
-            println!("{:?} - {:?}", res.status(), res.url().to_string());
+
+            let name = request.name.as_ref().unwrap();
+            let status = res.status();
+            let resource = request.resource.as_ref().unwrap();
+            let method = request.method.as_ref().unwrap();
+
+            let url = res.url().to_string();
+
+            println!("{num} | {name} | {method} | {url} | {status} |");
 
             let text = res.text().await?;
 
             let json: serde_json::Value = serde_json::from_str(&text).expect("should decode");
-            println!("{:#?}", json);
+            // println!("{:#?}", json);
 
             println!("-----")
         }
