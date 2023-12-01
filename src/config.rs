@@ -6,7 +6,7 @@ use std::{error::Error, path::PathBuf};
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Config {
     pub config_path: PathBuf,
-    pub parallel: bool,
+    pub parallel: usize,
     pub request_names: Vec<String>,
 }
 
@@ -14,7 +14,7 @@ impl TryFrom<Cli> for Config {
     type Error = Box<dyn Error>;
 
     fn try_from(value: Cli) -> Result<Self, Box<dyn Error>> {
-        let parallel = value.parallel.unwrap_or(false);
+        let parallel = value.parallel.unwrap_or(0);
         let config_file = value.config_path.unwrap_or(PathBuf::from("requests.yml"));
         let request_names = value.request_names;
 
@@ -42,7 +42,7 @@ mod test {
         .try_into()?;
 
         assert_eq!(config.config_path, PathBuf::from("requests.yml"));
-        assert!(!config.parallel);
+        assert_eq!(config.parallel, 0);
         assert_eq!(config.request_names, vec![] as Vec<String>);
 
         Ok(())
@@ -58,7 +58,7 @@ mod test {
         .try_into()?;
 
         assert_eq!(config.config_path, PathBuf::from("test.yml"));
-        assert!(!config.parallel);
+        assert_eq!(config.parallel, 0);
         assert_eq!(config.request_names, vec![] as Vec<String>);
 
         Ok(())
@@ -68,13 +68,13 @@ mod test {
     fn test_cli_config_parallel() -> Result<(), Box<dyn Error>> {
         let config: Config = Cli {
             config_path: None,
-            parallel: Some(true),
+            parallel: Some(4),
             request_names: vec![],
         }
         .try_into()?;
 
         assert_eq!(config.config_path, PathBuf::from("requests.yml"));
-        assert!(config.parallel);
+        assert_eq!(config.parallel, 4);
         assert_eq!(config.request_names, vec![] as Vec<String>);
 
         Ok(())
@@ -94,7 +94,7 @@ mod test {
         .try_into()?;
 
         assert_eq!(config.config_path, PathBuf::from("requests.yml"));
-        assert!(!config.parallel);
+        assert_eq!(config.parallel, 0);
         assert_eq!(
             config.request_names,
             vec![
@@ -111,7 +111,7 @@ mod test {
     fn test_cli_config_combi() -> Result<(), Box<dyn Error>> {
         let config: Config = Cli {
             config_path: Some(PathBuf::from("test.yml")),
-            parallel: Some(true),
+            parallel: Some(8),
             request_names: vec![
                 String::from("test_one"),
                 String::from("test_two"),
@@ -121,7 +121,7 @@ mod test {
         .try_into()?;
 
         assert_eq!(config.config_path, PathBuf::from("test.yml"));
-        assert!(config.parallel);
+        assert_eq!(config.parallel, 8);
         assert_eq!(
             config.request_names,
             vec![

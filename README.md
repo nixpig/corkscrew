@@ -9,6 +9,23 @@ A simple tool for executing HTTP requests configured in YAML. Written in Rust, b
 **Execute all requests in `requests.yml` file:**
 
 ```shell
+$ corkscrew --help
+
+Configure HTTP requests in YAML and execute from the command line.
+
+Usage: corkscrew [OPTIONS] [REQUEST_NAMES]...
+
+Arguments:
+  [REQUEST_NAMES]...
+
+Options:
+  -f, --file <file_path>        Path to file containing requests [default: requests.yml]
+  -p, --parallel <num_threads>  Specify number of parallel threads
+  -h, --help                    Print help
+  -V, --version                 Print version
+```
+
+```shell
 $ corkscrew
   # => get request to https://example.com/posts/1
   # => get request to https://example.com/comments?postId=1
@@ -89,20 +106,7 @@ $ corkscrew
 1. `mv target/release/corkscrew ~/.local/bin/`
 
 ```shell
-$ corkscrew --help
 
-A simple tool for executing HTTP requests defined in a YAML config. Written in Rust, btw.
-
-Usage: corkscrew [OPTIONS] [REQUEST_NAMES]...
-
-Arguments:
-  [REQUEST_NAMES]...
-
-Options:
-  -f, --file <file_path>  Path to file containing requests [default: requests.yml]
-  -p, --parallel          Run requests in parallel
-  -h, --help              Print help
-  -V, --version           Print version
 ```
 
 ## API
@@ -163,7 +167,7 @@ I've tried most of these in the past, but they didn't quite fit into my workflow
 | cURL    | CLI  | Depending on the approach, either searching through shell history or maintaining lots of `.http` files. |
 | Postman | GUI  | GUI apps don't fit well into my workflow. JSON is a pain to maintain.                                   |
 
-Yes, I've also tried _insert favourite util here_, raw-dogging `ncat` requests, and everything in between.
+Yes, I've probably also tried _insert favourite util here_, raw-dogging `ncat` requests, and everything in between.
 
 ## Contribute
 
@@ -179,5 +183,5 @@ Feel free to leave constructive comments, feedback or suggestions in the [issues
 - Add option to output various data from request response.
 - Show some 'in progress' message/counter.
 - Improve structure and algorithm of request struct recursion.
-- Add option to specify nested groups of requests by `request:request` / `request_group:request_group` / `request_group:request`.
+- Add option to specify nested groups of requests by `request_group` / `request_group:request_group` / `request_group:request`.
 - Make the parser option configurable, e.g. `corkscrew --parser json`, to implement different parsers instead of YAML.
