@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::cli::Cli;
+use crate::types::cli::Cli;
 use std::{error::Error, path::PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -29,7 +29,7 @@ impl TryFrom<Cli> for Settings {
 #[cfg(test)]
 mod test {
     use super::Settings;
-    use crate::cli::Cli;
+    use crate::types::cli::Cli;
     use std::{error::Error, path::PathBuf};
 
     #[test]

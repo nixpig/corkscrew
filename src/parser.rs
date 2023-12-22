@@ -1,14 +1,13 @@
-use crate::requests::Requests;
 use crate::settings::Settings;
-use crate::types::RequestData;
+use crate::types::{Detail, Requests};
 
-fn parser(src: &Vec<RequestData>, target: &mut Vec<RequestData>, parent_index: usize) {
+fn parser(src: &Vec<Detail>, target: &mut Vec<Detail>, parent_index: usize) {
     for request_data in src {
         if request_data.name.is_none() && request_data.requests.is_none() {
             panic!("All requests must have a name or requests.");
         }
 
-        target.push(RequestData::new());
+        target.push(Detail::new());
         let pos = target.len() - 1;
 
         target[pos].name = match &request_data.name {
@@ -117,9 +116,9 @@ mod test {
 
     use crate::{
         parser::parse,
-        requests::Requests,
         settings::Settings,
-        types::{AuthType, RequestData},
+        types::Requests,
+        types::{AuthType, Detail},
     };
 
     #[should_panic]
@@ -227,7 +226,7 @@ mod test {
 
         let got = parse(&settings, source);
 
-        let want = vec![RequestData {
+        let want = vec![Detail {
             name: Some(String::from("test_required_fields")),
             host: Some(String::from("localhost")),
             port: None,
@@ -278,7 +277,7 @@ mod test {
         let got = parse(&settings, source);
 
         let want = vec![
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_0")),
                 host: Some(String::from("localhost.1")),
                 port: None,
@@ -295,7 +294,7 @@ mod test {
                 resource: Some(String::from("/api/0")),
                 requests: None,
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_1")),
                 host: Some(String::from("localhost.1")),
                 port: None,
@@ -312,7 +311,7 @@ mod test {
                 resource: Some(String::from("/api/1")),
                 requests: None,
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_2")),
                 host: Some(String::from("localhost.2")),
                 port: None,
@@ -329,7 +328,7 @@ mod test {
                 resource: Some(String::from("/api/2")),
                 requests: None,
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_3")),
                 host: Some(String::from("localhost.3")),
                 port: None,
@@ -383,7 +382,7 @@ mod test {
         let got = parse(&settings, source);
 
         let want = vec![
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_1")),
                 host: Some(String::from("localhost.1")),
                 port: None,
@@ -400,7 +399,7 @@ mod test {
                 resource: Some(String::from("/api/1")),
                 requests: None,
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_2")),
                 host: Some(String::from("localhost.2")),
                 port: None,
@@ -417,7 +416,7 @@ mod test {
                 resource: Some(String::from("/api/2")),
                 requests: None,
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_nested_required_fields_3")),
                 host: Some(String::from("localhost.3")),
                 port: None,
@@ -462,7 +461,7 @@ mod test {
 
         let got = parse(&settings, source);
 
-        let want = vec![RequestData {
+        let want = vec![Detail {
             name: Some(String::from("test_basic_auth")),
             host: Some(String::from("localhost")),
             port: None,
@@ -509,7 +508,7 @@ mod test {
 
         let got = parse(&settings, source);
 
-        let want = vec![RequestData {
+        let want = vec![Detail {
             name: Some(String::from("test_bearer_auth")),
             host: Some(String::from("localhost")),
             port: None,
@@ -583,7 +582,7 @@ mod test {
         let got = parse(&settings, source);
 
         let want = vec![
-            RequestData {
+            Detail {
                 name: Some(String::from("test_post_1")),
                 method: Some(String::from("post")),
                 resource: Some(String::from("/api/test_1")),
@@ -626,7 +625,7 @@ mod test {
                     .unwrap(),
                 ),
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_post_2")),
                 method: Some(String::from("patch")),
                 resource: Some(String::from("/api/test_2")),
@@ -703,7 +702,7 @@ mod test {
 
         let got = parse(&settings, source);
 
-        let want = vec![RequestData {
+        let want = vec![Detail {
             name: Some(String::from("test_patch_2")),
             method: Some(String::from("patch")),
             resource: Some(String::from("/api/test_2")),
@@ -780,7 +779,7 @@ mod test {
         let got = parse(&settings, source);
 
         let want = vec![
-            RequestData {
+            Detail {
                 name: Some(String::from("test_post_1")),
                 method: Some(String::from("post")),
                 resource: Some(String::from("/api/test_1")),
@@ -823,7 +822,7 @@ mod test {
                     .unwrap(),
                 ),
             },
-            RequestData {
+            Detail {
                 name: Some(String::from("test_get_3")),
                 method: Some(String::from("get")),
                 resource: Some(String::from("/api/test_3")),

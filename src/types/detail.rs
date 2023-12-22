@@ -4,8 +4,8 @@ use crate::types::auth::AuthType;
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct RequestData {
-    pub requests: Option<Vec<RequestData>>,
+pub struct Detail {
+    pub requests: Option<Vec<Detail>>,
     pub name: Option<String>,
     pub host: Option<String>,
     pub scheme: Option<String>,
@@ -22,15 +22,15 @@ pub struct RequestData {
     pub form: Option<HashMap<String, String>>,
 }
 
-impl Default for RequestData {
-    fn default() -> RequestData {
-        RequestData::new()
+impl Default for Detail {
+    fn default() -> Detail {
+        Detail::new()
     }
 }
 
-impl RequestData {
-    pub fn new() -> RequestData {
-        RequestData {
+impl Detail {
+    pub fn new() -> Detail {
+        Detail {
             requests: None,
             name: None,
             host: None,
