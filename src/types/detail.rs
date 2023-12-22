@@ -49,3 +49,69 @@ impl Detail {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::Detail;
+    use std::error::Error;
+
+    #[test]
+    fn test_default_detail_construction() -> Result<(), Box<dyn Error>> {
+        let got = Detail::default();
+
+        let expected = Detail {
+            requests: None,
+            name: None,
+            host: None,
+            scheme: None,
+            port: None,
+            timeout: None,
+            resource: None,
+            method: None,
+            hash: None,
+            params: None,
+            headers: None,
+            auth: None,
+            content: None,
+            body: None,
+            form: None,
+        };
+
+        assert_eq!(
+            got, expected,
+            "should construct Detail struct with None for all fields"
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_new_detail_construction() -> Result<(), Box<dyn Error>> {
+        let got = Detail::new();
+
+        let expected = Detail {
+            requests: None,
+            name: None,
+            host: None,
+            scheme: None,
+            port: None,
+            timeout: None,
+            resource: None,
+            method: None,
+            hash: None,
+            params: None,
+            headers: None,
+            auth: None,
+            content: None,
+            body: None,
+            form: None,
+        };
+
+        assert_eq!(
+            got, expected,
+            "should construct Detail struct with None for all fields"
+        );
+
+        Ok(())
+    }
+}

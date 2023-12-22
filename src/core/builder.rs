@@ -88,3 +88,15 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
 
     Ok(requests)
 }
+
+#[cfg(test)]
+
+mod test {
+    use crate::builder::build;
+    use reqwest::Client;
+    use std::error::Error;
+
+    async fn test_build_requests() -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+}
