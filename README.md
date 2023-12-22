@@ -131,7 +131,15 @@ Currently implemented. This is a work in progress and open to change.
     username: Optional<string> # in the case of !basic authentication, provide the username to use
     password: Optional<string> # in the case of !basic authentication, provide the password to use
 
-  # Optional body content (parsed to JSON)
+  content: Optional<json|form> # the content type to use for post requests (default: json)
+
+  # Optional form data content when `content: form` is set
+  form:
+    name1: value1
+    name2: value2
+    name3: value3
+
+  # Optional body content when `content: json` is set
   body:
     name: value # <property_name>: <property_value>
     # also supports nested JSON structures
@@ -179,6 +187,7 @@ Feel free to leave constructive comments, feedback or suggestions in the [issues
 
 ## TODO
 
+- Handle errors and non-happy path scenarios.
 - Add option to parallelise request execution and specify number of threads, e.g. `--parallel 4`.
 - Add option to output various data from request response.
 - Show some 'in progress' message/counter.
