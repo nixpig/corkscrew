@@ -655,4 +655,198 @@ mod test {
 
         Ok(())
     }
+
+    #[test]
+    fn test_parse_single_specified_request_name() -> Result<(), Box<dyn Error>> {
+        let source = "
+        - name: test_unconstrained_fields
+          host: localhost
+          timeout: 15
+          port: 3000
+          scheme: https
+          requests:
+            - name: test_post_1
+              method: post
+              resource: /api/test_1
+              hash: hash_location_1
+              headers:
+                Accept-Language: en-US,en;q=0.8
+                User-Agent: Mozilla/5.0 Firefox/50.0
+              params:
+                param1: value1
+                param2: value2
+              content: json
+              body:
+                prop1a: val1a
+                prop1b:
+                  prop2a: val2a
+                  prop2b:
+                    prop3a: val3a
+                    prop3b: val3b
+            - name: test_patch_2
+              method: patch
+              resource: /api/test_2
+              hash: hash_location_2
+              params:
+                paramA: valueA
+                paramB: valueB
+            - name: test_get_3
+              method: get
+              resource: /api/test_3
+        ";
+
+        let settings = Settings {
+            parallel: 0,                    // <- not used by parser
+            config_path: PathBuf::from(""), // <- not used by parser
+            request_names: vec!["test_patch_2".to_string()],
+        };
+
+        let got = parse(&settings, source);
+
+        let want = vec![RequestData {
+            name: Some(String::from("test_patch_2")),
+            method: Some(String::from("patch")),
+            resource: Some(String::from("/api/test_2")),
+            hash: Some(String::from("hash_location_2")),
+            host: Some(String::from("localhost")),
+            port: Some(3000),
+            timeout: Some(15),
+            scheme: Some(String::from("https")),
+            requests: None,
+            auth: None,
+            content: None,
+            form: None,
+            body: None,
+            headers: None,
+            params: Some(HashMap::from([
+                (String::from("paramA"), String::from("valueA")),
+                (String::from("paramB"), String::from("valueB")),
+            ])),
+        }];
+
+        assert_eq!(
+            got.requests, want,
+            "should only include specified request name"
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_multiple_specified_request_names() -> Result<(), Box<dyn Error>> {
+        let source = "
+        - name: test_unconstrained_fields
+          host: localhost
+          timeout: 15
+          port: 3000
+          scheme: https
+          requests:
+            - name: test_post_1
+              method: post
+              resource: /api/test_1
+              hash: hash_location_1
+              headers:
+                Accept-Language: en-US,en;q=0.8
+                User-Agent: Mozilla/5.0 Firefox/50.0
+              params:
+                param1: value1
+                param2: value2
+              content: json
+              body:
+                prop1a: val1a
+                prop1b:
+                  prop2a: val2a
+                  prop2b:
+                    prop3a: val3a
+                    prop3b: val3b
+            - name: test_patch_2
+              method: patch
+              resource: /api/test_2
+              hash: hash_location_2
+              params:
+                paramA: valueA
+                paramB: valueB
+            - name: test_get_3
+              method: get
+              resource: /api/test_3
+        ";
+
+        let settings = Settings {
+            parallel: 0,                    // <- not used by parser
+            config_path: PathBuf::from(""), // <- not used by parser
+            request_names: vec!["test_post_1".to_string(), "test_get_3".to_string()],
+        };
+
+        let got = parse(&settings, source);
+
+        let want = vec![
+            RequestData {
+                name: Some(String::from("test_post_1")),
+                method: Some(String::from("post")),
+                resource: Some(String::from("/api/test_1")),
+                hash: Some(String::from("hash_location_1")),
+                host: Some(String::from("localhost")),
+                port: Some(3000),
+                timeout: Some(15),
+                scheme: Some(String::from("https")),
+                requests: None,
+                auth: None,
+                headers: Some(HashMap::from([
+                    (
+                        String::from("Accept-Language"),
+                        String::from("en-US,en;q=0.8"),
+                    ),
+                    (
+                        String::from("User-Agent"),
+                        String::from("Mozilla/5.0 Firefox/50.0"),
+                    ),
+                ])),
+                params: Some(HashMap::from([
+                    (String::from("param1"), String::from("value1")),
+                    (String::from("param2"), String::from("value2")),
+                ])),
+                content: Some(String::from("json")),
+                form: None,
+                body: Some(
+                    serde_json::from_str(
+                        "{
+                                    \"prop1a\": \"val1a\",
+                                    \"prop1b\": {
+                                        \"prop2a\": \"val2a\",
+                                        \"prop2b\": {
+                                            \"prop3a\": \"val3a\",
+                                            \"prop3b\": \"val3b\"
+                                        }
+                                    }
+                                }",
+                    )
+                    .unwrap(),
+                ),
+            },
+            RequestData {
+                name: Some(String::from("test_get_3")),
+                method: Some(String::from("get")),
+                resource: Some(String::from("/api/test_3")),
+                host: Some(String::from("localhost")),
+                port: Some(3000),
+                timeout: Some(15),
+                scheme: Some(String::from("https")),
+                requests: None,
+                auth: None,
+                content: None,
+                form: None,
+                body: None,
+                headers: None,
+                hash: None,
+                params: None,
+            },
+        ];
+
+        assert_eq!(
+            got.requests, want,
+            "should only include specified request names"
+        );
+
+        Ok(())
+    }
 }
