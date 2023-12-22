@@ -1,12 +1,12 @@
 use reqwest::header::HeaderValue;
 
-use crate::types::{AuthType, Method, Requests};
+use crate::types::{AuthType, Detail, Method};
 use std::{collections::HashMap, error::Error, time::Duration};
 
-pub async fn build(config: &Requests) -> Result<Vec<reqwest::RequestBuilder>, Box<dyn Error>> {
+pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>, Box<dyn Error>> {
     let mut requests: Vec<reqwest::RequestBuilder> = vec![];
 
-    for request_detail in config.requests.iter() {
+    for request_detail in details.iter() {
         let mut url = String::from("");
         let mut headers = reqwest::header::HeaderMap::new();
         let mut params = HashMap::new();

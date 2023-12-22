@@ -1,5 +1,4 @@
-use crate::settings::Settings;
-use crate::types::{Detail, Requests};
+use crate::types::Detail;
 
 fn parser(src: &Vec<Detail>, target: &mut Vec<Detail>, parent_index: usize) {
     for request_data in src {
@@ -86,27 +85,25 @@ fn parser(src: &Vec<Detail>, target: &mut Vec<Detail>, parent_index: usize) {
     }
 }
 
-pub fn parse(settings: &Settings, source: &str) -> Requests {
+pub fn parse(source: &str, request_names: Vec<String>) -> Vec<Detail> {
     let s = &serde_yaml::from_str(source).expect("Failed to parse config from provided yaml.");
 
     let mut request_config = vec![];
 
     parser(s, &mut request_config, 0);
 
-    Requests {
-        requests: request_config
-            .into_iter()
-            .filter(|r| {
-                let has_resource = r.resource.is_some();
-                let has_name = r.name.is_some();
-                let run_all = settings.request_names.is_empty();
+    request_config
+        .into_iter()
+        .filter(|r| {
+            let has_resource = r.resource.is_some();
+            let has_name = r.name.is_some();
+            let run_all = request_names.is_empty();
 
-                return has_resource
-                    && has_name
-                    && (run_all || settings.request_names.contains(r.name.as_ref().unwrap()));
-            })
-            .collect(),
-    }
+            return has_resource
+                && has_name
+                && (run_all || request_names.contains(r.name.as_ref().unwrap()));
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -117,7 +114,6 @@ mod test {
     use crate::{
         parser::parse,
         settings::Settings,
-        types::Requests,
         types::{AuthType, Detail},
     };
 
@@ -134,7 +130,7 @@ mod test {
             request_names: vec![],
         };
 
-        parse(&settings, source);
+        parse(source, settings.request_names);
     }
 
     #[test]
@@ -147,9 +143,9 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
-        assert_eq!(got, Requests { requests: vec![] }, "should be filtered out");
+        assert_eq!(got, vec![], "should be filtered out");
 
         Ok(())
     }
@@ -167,9 +163,9 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
-        assert_eq!(got, Requests { requests: vec![] }, "should be filtered out");
+        assert_eq!(got, vec![], "should be filtered out");
 
         Ok(())
     }
@@ -187,7 +183,7 @@ mod test {
             request_names: vec![],
         };
 
-        parse(&settings, source);
+        parse(source, settings.request_names);
     }
 
     #[test]
@@ -203,9 +199,9 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
-        assert_eq!(got, Requests { requests: vec![] }, "should be filtered out");
+        assert_eq!(got, vec![], "should be filtered out");
 
         Ok(())
     }
@@ -224,7 +220,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![Detail {
             name: Some(String::from("test_required_fields")),
@@ -244,7 +240,7 @@ mod test {
             requests: None,
         }];
 
-        assert_eq!(got.requests, want, "should contruct requests config");
+        assert_eq!(got, want, "should contruct requests config");
 
         Ok(())
     }
@@ -274,7 +270,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![
             Detail {
@@ -348,7 +344,7 @@ mod test {
         ];
 
         assert_eq!(
-            got.requests, want,
+            got, want,
             "should expand nested request configs to root level and merge with parent properties"
         );
 
@@ -379,7 +375,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![
             Detail {
@@ -436,7 +432,7 @@ mod test {
         ];
 
         assert_eq!(
-            got.requests, want,
+            got, want,
             "should expand nested request configs and merge with parents; root should be excluded"
         );
 
@@ -459,7 +455,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![Detail {
             name: Some(String::from("test_basic_auth")),
@@ -483,7 +479,7 @@ mod test {
         }];
 
         assert_eq!(
-            got.requests, want,
+            got, want,
             "should parse basic auth enum and required username and password props"
         );
 
@@ -506,7 +502,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![Detail {
             name: Some(String::from("test_bearer_auth")),
@@ -529,7 +525,7 @@ mod test {
         }];
 
         assert_eq!(
-            got.requests, want,
+            got, want,
             "should parse required bearer enum and required token prop"
         );
 
@@ -579,7 +575,7 @@ mod test {
             request_names: vec![],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![
             Detail {
@@ -648,7 +644,7 @@ mod test {
         ];
 
         assert_eq!(
-            got.requests, want,
+            got, want,
             "should parse all configurable request config props"
         );
 
@@ -700,7 +696,7 @@ mod test {
             request_names: vec!["test_patch_2".to_string()],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![Detail {
             name: Some(String::from("test_patch_2")),
@@ -723,10 +719,7 @@ mod test {
             ])),
         }];
 
-        assert_eq!(
-            got.requests, want,
-            "should only include specified request name"
-        );
+        assert_eq!(got, want, "should only include specified request name");
 
         Ok(())
     }
@@ -776,7 +769,7 @@ mod test {
             request_names: vec!["test_post_1".to_string(), "test_get_3".to_string()],
         };
 
-        let got = parse(&settings, source);
+        let got = parse(source, settings.request_names);
 
         let want = vec![
             Detail {
@@ -841,10 +834,7 @@ mod test {
             },
         ];
 
-        assert_eq!(
-            got.requests, want,
-            "should only include specified request names"
-        );
+        assert_eq!(got, want, "should only include specified request names");
 
         Ok(())
     }

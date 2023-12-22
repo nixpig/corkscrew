@@ -21,10 +21,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     });
 
     // 3. Parse config
-    let config = parser::parse(&settings, &contents);
+    let details = parser::parse(&contents, settings.request_names);
 
     // 4. Build requests
-    let requests = builder::build(&config).await?;
+    let requests = builder::build(details).await?;
 
     // 5. Execute requests
     let results = executor::exec(requests).await?;
