@@ -122,6 +122,22 @@ mod test {
         types::{AuthType, RequestData},
     };
 
+    #[should_panic]
+    #[test]
+    fn test_invalid_content() {
+        let source = "
+- df908jwifoqedjklfag
+";
+
+        let settings = Settings {
+            parallel: 0,                    // <- not used by parser
+            config_path: PathBuf::from(""), // <- not used by parser
+            request_names: vec![],
+        };
+
+        parse(&settings, source);
+    }
+
     #[test]
     fn test_empty_string() -> Result<(), Box<dyn Error>> {
         let source = "";
