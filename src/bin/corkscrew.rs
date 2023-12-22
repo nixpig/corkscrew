@@ -2,11 +2,12 @@ use clap::Parser;
 use cli_table::{print_stdout, WithTitle};
 use corkscrew::cli::Cli;
 use corkscrew::parser;
-use corkscrew::{error::CorkscrewError, settings::Settings};
+use corkscrew::settings::Settings;
+use std::error::Error;
 use std::fs;
 
 #[tokio::main]
-async fn main() -> Result<(), CorkscrewError> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let settings: Settings = Cli::parse()
         .try_into()
         .expect("Failed to parse provided arguments. Run 'corkscrew --help' for help.");

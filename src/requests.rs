@@ -1,13 +1,9 @@
 use cli_table;
 use reqwest::header::HeaderValue;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, ops::Index, time::Duration};
+use std::{collections::HashMap, error::Error, ops::Index, time::Duration};
 
-use crate::{
-    error::{handle_error, CorkscrewError},
-    settings::Settings,
-    types::{AuthType, RequestData},
-};
+use crate::types::{AuthType, RequestData};
 
 #[derive(cli_table::Table)]
 pub struct Output {
@@ -41,7 +37,7 @@ impl Requests {
         Requests { requests: vec![] }
     }
 
-    pub async fn exec(config: &Requests) -> Result<Vec<Output>, CorkscrewError> {
+    pub async fn exec(config: &Requests) -> Result<Vec<Output>, Box<dyn Error>> {
         let mut output: Vec<Output> = vec![];
 
         for (num, request) in config.requests.iter().enumerate() {
@@ -118,32 +114,35 @@ impl Requests {
                 .form(form)
                 .json(body);
 
-            if let Ok(res) = req.send().await {
-                let default_method = String::from("get");
-                let name = request.name.as_ref().unwrap();
-                let status = res.status();
-                let method = request.method.as_ref().unwrap_or(&default_method);
-                let _url = res.url().to_string();
+            match req.send().await {
+                Ok(res) => {
+                    let default_method = String::from("get");
+                    let name = request.name.as_ref().unwrap();
+                    let status = res.status();
+                    let method = request.method.as_ref().unwrap_or(&default_method);
+                    let _url = res.url().to_string();
 
-                let resource = request.resource.as_ref().unwrap();
+                    let resource = request.resource.as_ref().unwrap();
 
-                if let Ok(text) = res.text().await {
-                    let json: serde_json::Value =
-                        serde_json::from_str(&text).expect("should decode");
+                    match res.text().await {
+                        Ok(text) => {
+                            let json: serde_json::Value =
+                                serde_json::from_str(&text).expect("should decode");
 
-                    output.push(Output {
-                        num,
-                        resource: String::from(resource),
-                        name: String::from(name),
-                        status: status.to_string(),
-                        method: method.to_string(),
-                        // data: json.to_string(),
-                    });
-                } else {
-                    handle_error(CorkscrewError::Request)
+                            output.push(Output {
+                                num,
+                                resource: String::from(resource),
+                                name: String::from(name),
+                                status: status.to_string(),
+                                method: method.to_string(),
+                                // data: json.to_string(),
+                            });
+                        }
+                        Err(_) => {}
+                    }
                 }
-            } else {
-                handle_error(CorkscrewError::Request)
+
+                Err(_) => (),
             }
         }
 
