@@ -1,7 +1,5 @@
 use clap::Parser;
-use cli_table::{print_stdout, WithTitle};
-use corkscrew::executor;
-use corkscrew::{builder, parser, settings::Settings, types::cli::Cli};
+use corkscrew::{builder, executor, parser, printer, settings::Settings, types::cli::Cli};
 use std::error::Error;
 use std::fs;
 
@@ -30,10 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let results = executor::exec(requests).await?;
 
     // 6. Display results
-    // let _ = displayer::display(&results);
-    // let _ = print_stdout(requests.with_title());
-
-    println!("{:#?}", results);
+    printer::print(results);
 
     Ok(())
 }
