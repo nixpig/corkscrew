@@ -124,7 +124,6 @@ $ corkscrew
   host: example.com
   resource: /api/comments
   method: post
-  content: form
   form:
     userId: 3
     comment: I really liked this!
@@ -237,15 +236,13 @@ $ corkscrew
     username: String # in the case of !basic authentication, provide the username to use
     password: String # in the case of !basic authentication, provide the password to use
 
-  content: String<json|form> # the content type to use for post requests (default: json)
-
-  # Optional form data content when `content: form` is set
+  # Optional form data content (implicitly sets Content-Type: application/x-www-form-urlencoded)
   form:
     name1: value1
     name2: value2
     name3: value3
 
-  # Optional body content when `content: json` is set
+  # Optional body content (implicityly sets Content-Type: application/json)
   body:
     name: value # <property_name>: <property_value>
     # also supports nested JSON structures

@@ -72,29 +72,15 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
 
         let timeout = request_detail.timeout.unwrap_or(10);
 
-        if let Some(content) = &request_detail.content {
-            match content.as_str() {
-                "form" => {
-                    let req = reqwest::Client::new()
-                        .request(method, &url)
-                        .timeout(Duration::from_secs(timeout))
-                        .headers(headers)
-                        .query(&params)
-                        .form(&form);
+        if form.len() > 0 {
+            let req = reqwest::Client::new()
+                .request(method, &url)
+                .timeout(Duration::from_secs(timeout))
+                .headers(headers)
+                .query(&params)
+                .form(&form);
 
-                    requests.push(req);
-                }
-                _ => {
-                    let req = reqwest::Client::new()
-                        .request(method, &url)
-                        .timeout(Duration::from_secs(timeout))
-                        .headers(headers)
-                        .query(&params)
-                        .json(&body);
-
-                    requests.push(req);
-                }
-            }
+            requests.push(req);
         } else {
             let req = reqwest::Client::new()
                 .request(method, &url)
