@@ -11,10 +11,6 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
         let mut headers = reqwest::header::HeaderMap::new();
         let mut params = HashMap::new();
 
-        let t =
-            HeaderValue::from_str("application/x-www-form-urlencoded").expect("to parse header");
-        headers.append("Content-Type", t);
-
         match &request_detail.scheme {
             Some(scheme) => url.push_str(scheme),
             None => url.push_str("http"),
@@ -56,11 +52,12 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
             headers = h.try_into().expect("Expected to receive valid headers.")
         }
 
-        let body = &request_detail
+        let body = request_detail
             .body
             .clone()
             .unwrap_or(serde_json::Value::Null);
-        let form = &request_detail.form.clone().unwrap_or(HashMap::new());
+
+        let form = request_detail.form.clone().unwrap_or(HashMap::new());
 
         let method = match &request_detail.method {
             Some(m) => Method {}[m].clone(),
@@ -75,15 +72,39 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
 
         let timeout = request_detail.timeout.unwrap_or(10);
 
-        let req = reqwest::Client::new()
-            .request(method, &url)
-            .timeout(Duration::from_secs(timeout))
-            .headers(headers)
-            .query(&params)
-            .form(form)
-            .json(body);
+        if let Some(content) = &request_detail.content {
+            match content.as_str() {
+                "form" => {
+                    let req = reqwest::Client::new()
+                        .request(method, &url)
+                        .timeout(Duration::from_secs(timeout))
+                        .headers(headers)
+                        .query(&params)
+                        .form(&form);
 
-        requests.push(req);
+                    requests.push(req);
+                }
+                _ => {
+                    let req = reqwest::Client::new()
+                        .request(method, &url)
+                        .timeout(Duration::from_secs(timeout))
+                        .headers(headers)
+                        .query(&params)
+                        .json(&body);
+
+                    requests.push(req);
+                }
+            }
+        } else {
+            let req = reqwest::Client::new()
+                .request(method, &url)
+                .timeout(Duration::from_secs(timeout))
+                .headers(headers)
+                .query(&params)
+                .json(&body);
+
+            requests.push(req);
+        }
     }
 
     Ok(requests)

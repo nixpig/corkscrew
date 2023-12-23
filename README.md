@@ -23,56 +23,162 @@ Options:
 
 ## Examples
 
-**Execute all requests in `requests.yml` file:**
-
-```shell
-$ corkscrew
-  # => get request to https://example.com/posts/1
-  # => get request to https://example.com/comments?postId=1
-  # => post request to https://example.com/posts with body { title, body, userId }
-```
-
-**Execute specific named request(s) in `foo.yml` file:**
-
-```shell
-$ corkscrew -f foo.yml get_comments create_post
-  # => get request to https://example.com/comments?postId=1
-  # => post request to https://example.com/posts with body { title, body, userId }
-```
+### Minimal example (single request)
 
 ```yaml
 # requests.yml
+
 - name: get_posts
   host: example.com
-  resource: /posts/1
+  resource: /api/posts
+```
 
-- name: get_comments
-  host: example.com
-  resource: /comments
-  params:
-    postId: 1
+```shell
+$ corkscrew
+```
 
-- name: create_post
+### Multiple requests
+
+```yaml
+# requests.yml
+
+- name: multiple requests
   host: example.com
-  resource: /posts
+  requests:
+    - name: get_users
+      resource: /api/users
+    - name: get_posts
+      resource: /api/posts
+    - name: get_comments
+      resource: /api/comments
+```
+
+```shell
+$ corkscrew
+  # => get request to http://example.com/api/users
+  # => get request to http://example.com/api/posts
+  # => get request to http://example.com/api/comments
+```
+
+### Specify requests
+
+```yaml
+# requests.yml
+
+- name: multiple requests
+  host: example.com
+  requests:
+    - name: get_users
+      resource: /api/users
+    - name: get_posts
+      resource: /api/posts
+    - name: get_comments
+      resource: /api/comments
+```
+
+```shell
+$ corkscrew get_posts get_comments
+  # => get request to http://example.com/api/posts
+  # => get request to http://example.com/api/comments
+```
+
+### Send POST request with JSON body
+
+```yaml
+# requests.yml
+
+- name: post_json_body
+  host: example.com
+  resource: /api/likes
   method: post
-  auth: !bearer
-    token: abcd$1234.231&4dfs-asdfjsdv.vsd
   body:
-    title: Lorem ipsum
-    body: Lorem ipsum dolar sit amet.
-    userId: 1
+    postId: 2
+    userId: 3
+```
 
-- name: update_post_title
+```shell
+$ corkscrew
+  # => post request to http://example.com/api/likes
+  # Content-Type: application/json
+  # { "postId": 2, "userId": 3 }
+```
+
+### Send POST request with form data
+
+```yml
+# requests.yml
+
+- name: post_form_data
   host: example.com
-  resource: /posts/1
-  method: patch
+  resource: /api/comments
+  method: post
+  content: form
+  form:
+    userId: 3
+    comment: I really liked this!
+```
+
+```shell
+$ corkscrew
+  # => post request to http://example.com/api/comments
+  # Content-Type: application/x-www-form-urlencoded
+  # userId=3&comment=I%20really%20liked%20this%21
+```
+
+### Send request with query parameters
+
+```yaml
+# requests.yml
+
+- name: query_params
+  host: example.com
+  resource: /api/comments
+  params:
+    userId: 3
+    limit: 10
+```
+
+```shell
+$ corkscrew
+  # => get request to http://example.com/api/comments?userId=3&limit=10
+```
+
+### Send request with auth token
+
+```yaml
+# requests.yml
+
+- name: bearer_auth
+  host: example.com
+  resource: /api/users
+  auth: !bearer
+    token: abcd$1234
+```
+
+```shell
+$ corkscrew
+  # => get request to http://example.com/api/users
+  # Authorization: Bearer <token>
+```
+
+### Send request with HTTP basic auth
+
+```yaml
+- name: basic_auth
+  host: example.com
+  resource: /api/login
   auth: !basic
     username: corks
     password: p4ssw0rd
-  body:
-    title: Dolar sit
 ```
+
+```shell
+$ corkscrew
+  # => get request to http://example.com/api/users
+  # Authorization: Basic <credentials>
+```
+
+### Nesting requests
 
 Requests can also be nested, where descendents can 'inherit' and/or 'override' properties from their ancestors.
 
@@ -80,6 +186,7 @@ Requests can also be nested, where descendents can 'inherit' and/or 'override' p
 - name: example_root
   host: example.com
   resource: /api
+  scheme: https
   requests:
     - name: example_get_post
       resource: /api/post
@@ -88,8 +195,6 @@ Requests can also be nested, where descendents can 'inherit' and/or 'override' p
       params:
         postId: 1
 ```
-
-Which would result in:
 
 ```shell
 $ corkscrew
@@ -111,7 +216,7 @@ $ corkscrew
 
 ## API
 
-Currently implemented. This is a work in progress and open to change.
+> This is a work in progress and open to change.
 
 ```yaml
 - name: Required<string> # name of the host (can be any string, it's not used to build the actual request)

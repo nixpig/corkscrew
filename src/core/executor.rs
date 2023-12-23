@@ -6,11 +6,10 @@ pub async fn exec(
     let mut responses: Vec<reqwest::Response> = vec![];
 
     for request in requests {
-        if let Ok(response) = request.send().await {
-            responses.push(response);
-        } else {
-            eprintln!("Some error on this request...")
-        }
+        match request.send().await {
+            Ok(response) => responses.push(response),
+            Err(e) => eprintln!("{}", e),
+        };
     }
 
     Ok(responses)
