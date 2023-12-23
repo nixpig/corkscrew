@@ -226,7 +226,7 @@ $ corkscrew
   port: Number # the port to use
   timeout: Number # number of seconds before timing out (default: 30)
   resource: String # that resource to request, e.g. /api/user
-  method: String<get|post|put|patch|delete> # the http method to use, e.g. !post (default: !get)
+  method: String<get|post|put|patch|delete> # the http method to use, e.g. post (default: get)
   params:
     # <parameter_name>: <parameter_value>
     name: value
