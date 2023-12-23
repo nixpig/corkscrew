@@ -47,6 +47,12 @@ Options:
 ```shell
 $ corkscrew
   # => get request to http://example.com/api/posts
+
++---+---------------------------------+--------+
+| # | URL                             | Status |
++---+---------------------------------+--------+
+| 0 | http://example.com/posts        | 200    |
++---+---------------------------------+--------+
 ```
 
 ### Multiple requests
