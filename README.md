@@ -21,6 +21,17 @@ Options:
   -V, --version           Print version
 ```
 
+## Installation
+
+1. `git clone https://github.com/nixpig/corkscrew.git`
+1. `cd corkscrew`
+1. `cargo build --release`
+1. `mv target/release/corkscrew ~/.local/bin/`
+
+```shell
+
+```
+
 ## Examples
 
 ### Minimal example (single request)
@@ -43,7 +54,7 @@ $ corkscrew
 ```yaml
 # requests.yml
 
-- name: multiple requests
+- name: multiple_requests
   host: example.com
   requests:
     - name: get_users
@@ -66,7 +77,7 @@ $ corkscrew
 ```yaml
 # requests.yml
 
-- name: multiple requests
+- name: multiple_requests
   host: example.com
   requests:
     - name: get_users
@@ -204,40 +215,29 @@ $ corkscrew
   # => get request to https://example.com/api/comments
 ```
 
-## Installation
-
-1. `git clone https://github.com/nixpig/corkscrew.git`
-1. `cd corkscrew`
-1. `cargo build --release`
-1. `mv target/release/corkscrew ~/.local/bin/`
-
-```shell
-
-```
-
 ## API
 
 > This is a work in progress and open to change.
 
 ```yaml
-- name: Required<string> # name of the host (can be any string, it's not used to build the actual request)
-  host: Optional<string> # the host to which to make a request, e.g. example.com
-  scheme: Optional<http|https> # the scheme to use, e.g. https (default: http)
-  port: Optional<number> # the port to use
-  timeout: Optional<number> # number of seconds before timing out (default: 30)
-  resource: Required<string> # that resource to request, e.g. /api/user
-  method: Optional<get|post|put|patch|delete> # the http method to use, e.g. !post (default: !get)
+- name: String # name of the host (can be any string, it's not used to build the actual request)
+  host: String # the host to which to make a request, e.g. example.com
+  scheme: String<http|https> # the scheme to use, e.g. https (default: http)
+  port: Number # the port to use
+  timeout: Number # number of seconds before timing out (default: 30)
+  resource: String # that resource to request, e.g. /api/user
+  method: String<get|post|put|patch|delete> # the http method to use, e.g. !post (default: !get)
   params:
     # <parameter_name>: <parameter_value>
     name: value
 
   # the type of authentication to use, valid values are !basic or !bearer
-  auth: !auth_type # valid enum values are !basic or !bearer
-    token: Optional<string> # in the case of !bearer authentication, provide the token to use
-    username: Optional<string> # in the case of !basic authentication, provide the username to use
-    password: Optional<string> # in the case of !basic authentication, provide the password to use
+  auth: Enum<!basic|!bearer> # valid enum values are !basic or !bearer
+    token: String # in the case of !bearer authentication, provide the token to use
+    username: String # in the case of !basic authentication, provide the username to use
+    password: String # in the case of !basic authentication, provide the password to use
 
-  content: Optional<json|form> # the content type to use for post requests (default: json)
+  content: String<json|form> # the content type to use for post requests (default: json)
 
   # Optional form data content when `content: form` is set
   form:
