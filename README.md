@@ -35,6 +35,7 @@ Options:
 
 ```shell
 $ corkscrew
+  # => get request to http://example.com/api/posts
 ```
 
 ### Multiple requests
