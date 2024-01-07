@@ -1,3 +1,6 @@
+[![Workflow Status](https://github.com/nixpig/corkscrew/actions/workflows/general.yml/badge.svg?branch=main)](https://github.com/nixpig/corkscrew/actions/workflows/general.yml?query=branch%3Amain)
+[![Coverage Status](https://coveralls.io/repos/github/nixpig/corkscrew/badge.svg?branch=main)](https://coveralls.io/github/nixpig/corkscrew?branch=main)
+
 # 🌀 corkscrew
 
 A simple tool for executing HTTP requests configured in YAML. Written in Rust, btw.
