@@ -1,7 +1,7 @@
 use crate::types::Detail;
 
-fn parser(src: &Vec<Detail>, target: &mut Vec<Detail>, parent_index: usize) {
-    for request_data in src {
+fn parser(source: &Vec<Detail>, target: &mut Vec<Detail>, parent_index: usize) {
+    for request_data in source {
         if request_data.name.is_none() && request_data.requests.is_none() {
             panic!("All requests must have a name or requests.");
         }
