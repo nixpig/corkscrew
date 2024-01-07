@@ -7,6 +7,12 @@ A simple tool for executing HTTP requests configured in YAML. Written in Rust, b
 
 > 🦀 This is my first ever project in Rust. No doubt there's going to me many things that can be improved upon. Happy to receive constructive suggestions in [issues](https://github.com/nixpig/corkscrew/issues).
 
+## ⚠️ WORK IN PROGRESS
+
+**It's probably not a good idea to actually use this for anything at this point. Maybe soon 🤷**
+
+## Features
+
 ```shell
 $ corkscrew --help
 
