@@ -72,7 +72,7 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
 
         let timeout = request_detail.timeout.unwrap_or(10);
 
-        if form.len() > 0 {
+        if !form.is_empty() {
             let req = reqwest::Client::new()
                 .request(method, &url)
                 .timeout(Duration::from_secs(timeout))
