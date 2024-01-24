@@ -32,6 +32,9 @@ Options:
 
 ## Installation
 
+### Build from source
+
+1. Install the Rust toolchain ([instructions](https://rustup.rs/))
 1. `git clone https://github.com/nixpig/corkscrew.git`
 1. `cd corkscrew`
 1. `cargo build --release`

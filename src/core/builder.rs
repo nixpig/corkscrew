@@ -3,8 +3,10 @@ use reqwest::header::HeaderValue;
 use crate::types::{AuthType, Detail, Method};
 use std::{collections::HashMap, error::Error, time::Duration};
 
-pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>, Box<dyn Error>> {
-    let mut requests: Vec<reqwest::RequestBuilder> = vec![];
+pub async fn build(
+    details: Vec<Detail>,
+) -> Result<HashMap<String, reqwest::RequestBuilder>, Box<dyn Error>> {
+    let mut requests = HashMap::<String, reqwest::RequestBuilder>::new();
 
     for request_detail in details.iter() {
         let mut url = String::from("");
@@ -80,7 +82,14 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
                 .query(&params)
                 .form(&form);
 
-            requests.push(req);
+            requests.insert(
+                request_detail
+                    .name
+                    .as_deref()
+                    .expect("All requests must have a name")
+                    .to_string(),
+                req,
+            );
         } else {
             let req = reqwest::Client::new()
                 .request(method, &url)
@@ -89,21 +98,16 @@ pub async fn build(details: Vec<Detail>) -> Result<Vec<reqwest::RequestBuilder>,
                 .query(&params)
                 .json(&body);
 
-            requests.push(req);
+            requests.insert(
+                request_detail
+                    .name
+                    .as_deref()
+                    .expect("All requests must have a name")
+                    .to_string(),
+                req,
+            );
         }
     }
 
     Ok(requests)
-}
-
-#[cfg(test)]
-
-mod test {
-    use crate::builder::build;
-    use reqwest::Client;
-    use std::error::Error;
-
-    async fn test_build_requests() -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
 }

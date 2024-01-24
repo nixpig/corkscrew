@@ -1,10 +1,7 @@
 #[derive(Debug, cli_table::Table)]
 pub struct Output {
-    #[table(title = "#")]
-    pub num: usize,
-
-    // #[table(title = "Name")]
-    // pub name: String,
+    #[table(title = "Name")]
+    pub name: String,
 
     // #[table(title = "Method")]
     // pub method: String,

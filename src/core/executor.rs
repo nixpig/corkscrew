@@ -1,13 +1,15 @@
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
 pub async fn exec(
-    requests: Vec<reqwest::RequestBuilder>,
-) -> Result<Vec<reqwest::Response>, Box<dyn Error>> {
-    let mut responses: Vec<reqwest::Response> = vec![];
+    requests: HashMap<String, reqwest::RequestBuilder>,
+) -> Result<HashMap<String, reqwest::Response>, Box<dyn Error>> {
+    let mut responses = HashMap::<String, reqwest::Response>::new();
 
-    for request in requests {
+    for (request_name, request) in requests {
         match request.send().await {
-            Ok(response) => responses.push(response),
+            Ok(response) => {
+                responses.insert(request_name, response);
+            }
             Err(e) => eprintln!("{}", e),
         };
     }
