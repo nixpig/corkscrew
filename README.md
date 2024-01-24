@@ -308,10 +308,11 @@ Feel free to leave constructive comments, feedback or suggestions in the [issues
 
 ## TODO
 
-- Handle errors and non-happy path scenarios.
-- Add option to parallelise request execution and specify number of threads, e.g. `--parallel 4`.
-- Add option to output various data from request response.
-- Show some 'in progress' message/counter.
-- Improve structure and algorithm of request struct recursion.
-- Add option to specify nested groups of requests by `request_group` / `request_group:request_group` / `request_group:request`.
-- Make the parser option configurable, e.g. `corkscrew --parser json`, to implement different parsers instead of YAML.
+- [ ] Use Hyper instead of Reqwest.
+- [ ] Handle errors and non-happy path scenarios.
+- [ ] Use a request client pool to reuse clients instead of creating new ones for every request.
+- [ ] Add option to parallelise request execution and specify number of threads, e.g. `--parallel 4`.
+- [ ] Add option to output various data from request response.
+- [ ] Show some 'in progress' message/counter.
+- [ ] Add option to specify nested groups of requests by `request_group` / `request_group:request_group` / `request_group:request`.
+- [ ] Get rid of all the data cloning, unwrapping, etc...
