@@ -16,26 +16,14 @@ mod test {
 - df908jwifoqedjklfag
 ";
 
-        let settings = Settings {
-            parallel: 0,                    // <- not used by parser
-            config_path: PathBuf::from(""), // <- not used by parser
-            request_names: vec![],
-        };
-
-        parse(source, settings.request_names);
+        parse(source, vec![]);
     }
 
     #[test]
     fn test_empty_string() -> Result<(), Box<dyn Error>> {
         let source = "";
 
-        let settings = Settings {
-            parallel: 0,                    // <- not used by parser
-            config_path: PathBuf::from(""), // <- not used by parser
-            request_names: vec![],
-        };
-
-        let got = parse(source, settings.request_names);
+        let got = parse(source, vec![]);
 
         assert_eq!(got, vec![], "should be filtered out");
 
@@ -49,13 +37,7 @@ mod test {
   requests: []
 ";
 
-        let settings = Settings {
-            parallel: 0,                    // <- not used by parser
-            config_path: PathBuf::from(""), // <- not used by parser
-            request_names: vec![],
-        };
-
-        let got = parse(source, settings.request_names);
+        let got = parse(source, vec![]);
 
         assert_eq!(got, vec![], "should be filtered out");
 

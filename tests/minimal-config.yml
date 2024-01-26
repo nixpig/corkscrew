@@ -1,0 +1,4 @@
+- name: test_minimal_config
+  host: localhost
+  port: 7878
+  resource: /api

@@ -3,7 +3,7 @@ use reqwest::header::HeaderValue;
 use crate::types::{AuthType, Detail, Method};
 use std::{collections::HashMap, error::Error, time::Duration};
 
-pub async fn build(
+pub fn build(
     details: Vec<Detail>,
 ) -> Result<HashMap<String, reqwest::RequestBuilder>, Box<dyn Error>> {
     let mut requests = HashMap::<String, reqwest::RequestBuilder>::new();
