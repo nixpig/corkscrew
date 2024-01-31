@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let results = run::go(settings).await?;
 
-    printer::print(results);
+    printer::print(results).await;
 
     Ok(())
 }

@@ -4,7 +4,7 @@ use cli_table::{print_stdout, WithTitle};
 
 use crate::Output;
 
-pub fn print(results: HashMap<String, reqwest::Response>) {
+pub async fn print(results: HashMap<String, reqwest::Response>) {
     let mut output: Vec<Output> = vec![];
 
     for (request_name, result) in results {

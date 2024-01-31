@@ -1,7 +1,0 @@
-- name: failer
-  host: jsonplaceholder.typicode.com
-  scheme: https
-  timeout: 10
-  port: 443
-  method: get
-  resource: /posts/1
