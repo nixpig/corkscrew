@@ -1,0 +1,28 @@
+---
+- name: requests
+  host: localhost
+  requests:
+    - name: request_one
+      method: post
+      resource: /test_endpoint_one
+      port: 7878
+      timeout: 10
+      params:
+        param_one: val_one
+        param_two: val_two
+      auth: !basic
+        username: corks
+        password: p4ssw0rd
+
+    - name: request_two
+      method: post
+      resource: /test_endpoint_two
+      port: 7878
+      hash: fragment_id
+      body:
+        field_one: val_one
+        field_two:
+          field_two_a: val_two_a
+          field_two_b: val_two_b
+      auth: !bearer
+        token: saoidhfjoiasdjhfw3980ufj029348jfiowejf89weaf
