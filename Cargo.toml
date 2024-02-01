@@ -15,6 +15,7 @@ clap = { version = "4.4.8", features = ["derive"] }
 cli-table = "0.4"
 serde_urlencoded = "0.7.1"
 http = "1.0.0"
+itertools = "0.12.1"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"

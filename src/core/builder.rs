@@ -3,10 +3,8 @@ use reqwest::header::HeaderValue;
 use crate::types::{AuthType, Detail, Method};
 use std::{collections::HashMap, error::Error, time::Duration};
 
-pub fn build(
-    details: Vec<Detail>,
-) -> Result<HashMap<String, reqwest::RequestBuilder>, Box<dyn Error>> {
-    let mut requests = HashMap::<String, reqwest::RequestBuilder>::new();
+pub fn build(details: Vec<Detail>) -> Result<HashMap<String, reqwest::Request>, Box<dyn Error>> {
+    let mut requests = HashMap::<String, reqwest::Request>::new();
 
     for request_detail in details.iter() {
         let mut url = String::from("");
@@ -28,7 +26,7 @@ pub fn build(
                     headers.append("Authorization", bearer_token_header_value);
                 }
                 AuthType::Basic { username, password } => {
-                    url.push_str(&format!("{username}:{password}"));
+                    url.push_str(&format!("{username}:{password}@"));
                 }
             }
         }
@@ -80,7 +78,9 @@ pub fn build(
                 .timeout(Duration::from_secs(timeout))
                 .headers(headers)
                 .query(&params)
-                .form(&form);
+                .form(&form)
+                .build()
+                .expect("unable to build request");
 
             requests.insert(
                 request_detail
@@ -96,7 +96,9 @@ pub fn build(
                 .timeout(Duration::from_secs(timeout))
                 .headers(headers)
                 .query(&params)
-                .json(&body);
+                .json(&body)
+                .build()
+                .expect("unable to build request");
 
             requests.insert(
                 request_detail
