@@ -2,7 +2,9 @@ use std::{collections::HashMap, error::Error, fs};
 
 use crate::{builder, executor, parser, Settings};
 
-pub async fn go(settings: Settings) -> Result<HashMap<String, reqwest::Response>, Box<dyn Error>> {
+pub async fn go(
+    settings: Settings,
+) -> Result<HashMap<String, Box<reqwest::Response>>, Box<dyn Error>> {
     // 2. Read in config file
     let contents = fs::read_to_string(&settings.config_path).unwrap_or_else(|_| {
         panic!(

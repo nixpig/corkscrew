@@ -21,8 +21,11 @@
       hash: fragment_id
       body:
         field_one: val_one
-        field_two:
+        field_two_obj:
           field_two_a: val_two_a
           field_two_b: val_two_b
+          num: 23
+          bool: true
+          arr: [1, 2, 3]
       auth: !bearer
         token: saoidhfjoiasdjhfw3980ufj029348jfiowejf89weaf

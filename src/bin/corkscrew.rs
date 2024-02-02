@@ -1,5 +1,5 @@
 use clap::Parser;
-use corkscrew::{printer, run, Cli, Settings};
+use corkscrew::{run, Cli, Settings};
 use std::error::Error;
 
 #[tokio::main]
@@ -11,7 +11,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let results = run::go(settings).await?;
 
-    printer::print(results).await;
+    for (name, result) in results {
+        println!("{}\t{}\t{}", name, result.status(), result.url());
+    }
 
     Ok(())
 }
