@@ -29,3 +29,17 @@
           arr: [1, 2, 3]
       auth: !bearer
         token: saoidhfjoiasdjhfw3980ufj029348jfiowejf89weaf
+
+    - name: http_methods
+      resource: /test_http_methods
+      port: 7878
+      requests:
+        - name: http_put
+          method: put
+        - name: http_patch
+          method: patch
+        - name: http_delete
+          method: delete
+        - name: http_get
+          method: get
+        - name: http_default

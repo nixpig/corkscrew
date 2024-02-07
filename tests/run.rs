@@ -51,6 +51,99 @@ async fn test_run_e2e() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[tokio::test]
+async fn test_http_methods() -> Result<(), Box<dyn Error>> {
+    let settings = Settings {
+        config_path: PathBuf::from("tests/e2e-config.yml"),
+        parallel: 0,
+        request_names: vec![
+            String::from("http_put"),
+            String::from("http_patch"),
+            String::from("http_delete"),
+            String::from("http_get"),
+            String::from("http_default"),
+        ],
+    };
+
+    start_server(7878).await;
+
+    let mut results = run::go(settings).await?;
+
+    let put = results
+        .remove("http_put")
+        .expect("should have the put response");
+
+    println!("PUT: {:#?}", put);
+
+    assert_eq!(
+        put.status(),
+        reqwest::StatusCode::OK,
+        "put should return ok"
+    );
+    assert_eq!(
+        put.text().await.expect("should have response text"),
+        "put_ok"
+    );
+
+    let patch = results
+        .remove("http_patch")
+        .expect("should have the patch response");
+
+    assert_eq!(
+        patch.status(),
+        reqwest::StatusCode::OK,
+        "patch should return ok"
+    );
+    assert_eq!(
+        patch.text().await.expect("should have response text"),
+        "patch_ok"
+    );
+
+    let delete = results
+        .remove("http_delete")
+        .expect("should have the delete response");
+
+    assert_eq!(
+        delete.status(),
+        reqwest::StatusCode::OK,
+        "delete should return ok"
+    );
+    assert_eq!(
+        delete.text().await.expect("should have response text"),
+        "delete_ok"
+    );
+
+    let get = results
+        .remove("http_get")
+        .expect("should have the get response");
+
+    assert_eq!(
+        get.status(),
+        reqwest::StatusCode::OK,
+        "get should return ok"
+    );
+    assert_eq!(
+        get.text().await.expect("should have response text"),
+        "get_ok"
+    );
+
+    let default = results
+        .remove("http_default")
+        .expect("should have the default (get) response");
+
+    assert_eq!(
+        default.status(),
+        reqwest::StatusCode::OK,
+        "default (get) should return ok",
+    );
+    assert_eq!(
+        default.text().await.expect("should have response text"),
+        "get_ok"
+    );
+
+    Ok(())
+}
+
 #[should_panic]
 #[tokio::test]
 async fn test_panics_on_missing_config_file() {
@@ -69,6 +162,13 @@ async fn start_server(port: u16) {
 
     let server = HttpServer::new(move || {
         App::new()
+            .service(
+                web::resource("/test_http_methods")
+                    .route(web::delete().to(handler_methods))
+                    .route(web::put().to(handler_methods))
+                    .route(web::patch().to(handler_methods))
+                    .route(web::get().to(handler_methods)),
+            )
             .service(web::resource("/test_endpoint_one").post(handler_one))
             .service(web::resource("/test_endpoint_two").post(handler_two))
     })
@@ -119,4 +219,15 @@ async fn handler_two(req: HttpRequest, body: web::Json<TestJsonL1>) -> HttpRespo
     assert_eq!(body.into_inner(), tj);
 
     HttpResponse::Ok().body("handler_two_ok")
+}
+
+async fn handler_methods(req: HttpRequest) -> HttpResponse {
+    println!("should be put: {:#?}", req);
+    match *req.method() {
+        reqwest::Method::GET => HttpResponse::Ok().body("get_ok"),
+        reqwest::Method::PUT => HttpResponse::Ok().body("put_ok"),
+        reqwest::Method::PATCH => HttpResponse::Ok().body("patch_ok"),
+        reqwest::Method::DELETE => HttpResponse::Ok().body("delete_ok"),
+        _ => HttpResponse::InternalServerError().finish(),
+    }
 }
